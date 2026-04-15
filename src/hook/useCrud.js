@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 
 /**
  * useCrud Hook
- * @param {Object} apiMethods - Object containing getAll, add, update, delete functions
+ * Updated to handle both Arrays and Single Objects (like Logos)
  */
 export const useCrud = (apiMethods) => {
   const [data, setData] = useState([]);
@@ -18,37 +18,49 @@ export const useCrud = (apiMethods) => {
       // Console log for debugging
       console.log("Full API Response in Hook:", res);
 
+      // Extract raw data from known keys
+      const rawData =
+        res?.categories ||
+        res?.homeBanner || // Backend key from your screenshot
+        res?.logo || // Singular key (Screenshot fix)
+        res?.logos || // Plural key
+        res?.blogCategories ||
+        res?.blogs ||
+        res?.data;
+
       /**
-       * DATA EXTRACTION LOGIC
-       * Backend se aane wale alag-alag keys ko handle karta hai.
-       * Aapka latest response 'res.categories' mein aa raha hai.
+       * TRANSFORMATION LOGIC:
+       * 1. If rawData is already an array, use it.
+       * 2. If rawData is a single object (like your logo), wrap it in an array [rawData].
+       * 3. If response itself is an array, use res.
+       * 4. Otherwise, default to empty array [].
        */
-      const result =
-        res?.categories || // For General Categories (Aapka latest response yahi hai)
-        res?.blogCategories || // For Blog Categories
-        res?.blogs || // For Blogs
-        res?.homeBanner || // For Banners
-        res?.logos || // For Logos
-        res?.data || // Fallback to .data
-        (Array.isArray(res) ? res : []); // If response itself is an array
+      let result = [];
+      if (Array.isArray(rawData)) {
+        result = rawData;
+      } else if (rawData && typeof rawData === "object") {
+        result = [rawData]; // Convert single object to array for .map()
+      } else if (Array.isArray(res)) {
+        result = res;
+      }
 
       setData(result);
     } catch (err) {
       console.error("Error in fetchAll:", err);
-      toast.error("Failed to fetch data");
+      // toast.error("Failed to fetch data");
     } finally {
       setLoading(false);
     }
-  }, [apiMethods]); // Dependency: Only changes if apiMethods object changes
+  }, [apiMethods]);
 
   // 2. ADD / CREATE
   const addItem = async (payload) => {
     setLoading(true);
     try {
-      console.log(">>> Adding Item with Payload:", payload);
+      console.log(">>> Adding Item:", payload);
       await apiMethods.add(payload);
       toast.success("Created Successfully!");
-      await fetchAll(); // List ko refresh karein
+      await fetchAll();
       return true;
     } catch (err) {
       console.error("Add Item Error:", err);
@@ -63,10 +75,10 @@ export const useCrud = (apiMethods) => {
   const updateItem = async (id, payload) => {
     setLoading(true);
     try {
-      console.log(`>>> Updating Item ID: ${id} with Payload:`, payload);
+      console.log(`>>> Updating Item ID: ${id}`, payload);
       await apiMethods.update(id, payload);
       toast.success("Updated Successfully!");
-      await fetchAll(); // List ko refresh karein
+      await fetchAll();
       return true;
     } catch (err) {
       console.error("Update Item Error:", err);
@@ -86,7 +98,7 @@ export const useCrud = (apiMethods) => {
       console.log(`>>> Deleting Item ID: ${id}`);
       await apiMethods.delete(id);
       toast.success("Deleted Successfully!");
-      await fetchAll(); // List ko refresh karein
+      await fetchAll();
       return true;
     } catch (err) {
       console.error("Delete Item Error:", err);

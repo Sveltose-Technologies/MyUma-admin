@@ -1,54 +1,14 @@
-// import React from "react";
-// import { Link, useLocation } from "react-router-dom";
 
-// const Sidebar = ({ isOpen, onClose }) => {
-//   const location = useLocation();
-//   const menu = [
-//     { name: "Dashboard", path: "/admin", icon: "bi-grid-1x2-fill" },
-//     { name: "Categories", path: "/admin/categories", icon: "bi-tags" },
-//     { name: "Banners", path: "/admin/banners", icon: "bi-image" }, // Example addition
-//   ];
-
-//   return (
-//     // yahan z-index inline style mein add kiya taaki wo backdrop ke upar rahe
-//     <div className={`sidebar ${isOpen ? "show" : ""}`} style={{ zIndex: 1060 }}>
-//       <div className="sidebar-logo d-flex justify-content-between align-items-center">
-//         <div>
-//           My<span style={{ color: "var(--gold)" }}>Uma</span>
-//         </div>
-//         {/* Mobile close button */}
-      //   <button className="btn text-white d-md-none border-0" onClick={onClose}>
-      //     <i className="bi bi-x-lg fs-4"></i>
-      //   </button>
-      // </div>
-
-//       <div className="sidebar-nav">
-//         {menu.map((item) => (
-//           <Link
-//             key={item.path}
-//             to={item.path}
-//             onClick={onClose} // Link click hone par sidebar close ho jayega
-//             className={`nav-link-item ${location.pathname === item.path ? "active" : ""}`}
-//             style={{ textDecoration: "none" }}>
-//             <i className={item.icon}></i>
-//             {item.name}
-//           </Link>
-//         ))}
-//       </div>
-//     </div>
-//   );
-// };
-// export default Sidebar;
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import CustomButton from "../common/CustomButton"; // Import your reusable button
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const menu = [
     { name: "Dashboard", path: "/admin", icon: "bi-grid-1x2-fill" },
+     { name: "Home", path: "/admin/home", icon: "bi-house-fill" },
     { name: "Categories", path: "/admin/categories", icon: "bi-tags" },
-    { name: "Banners", path: "/admin/banners", icon: "bi-image" },
+   
   ];
 
   return (

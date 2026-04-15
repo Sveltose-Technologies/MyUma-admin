@@ -147,3 +147,108 @@ export const deleteCategoryApi = async (id) => {
     throw error;
   }
 };
+
+export const addHomeBannerApi = async (formData) => {
+  const response = await api.post("/home-banner/add", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data;
+};
+
+export const getAllHomeBannersApi = async () => {
+  const response = await api.get("/home-banner/get-all");
+  console.log(
+    "<<< API SUCCESS: getAllHomeBannersApi | Response:",
+    response.data,
+  );
+  return response.data;
+};
+
+export const updateHomeBannerApi = async (id, formData) => {
+  const response = await api.put(`/home-banner/update/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  console.log(
+    "<<< API SUCCESS: updateHomeBannerApi | Response:",
+    response.data,
+  );
+  return response.data;
+};
+
+export const deleteHomeBannerApi = async (id) => {
+  const response = await api.delete(`/home-banner/delete/${id}`);
+  return response.data;
+};
+
+// ==========================================
+// 2. LOGO MANAGEMENT APIS
+// ==========================================
+
+export const getAllLogosApi = async () => {
+  console.log(">>> API CALL: getAllLogosApi | Requesting All Logos...");
+  try {
+    const response = await api.get("/logo/get-all");
+    console.log(
+      "<<< API SUCCESS: getAllLogosApi | Count:",
+      response.data?.logos?.length || 0,
+      "Response:",
+      response.data,
+    );
+    return response.data;
+  } catch (error) {
+    console.error(
+      "!!! API ERROR: getAllLogosApi | Details:",
+      error.response?.data || error.message,
+    );
+    throw error;
+  }
+};
+
+export const addLogoApi = async (formData) => {
+  console.log(">>> API CALL: addLogoApi | Uploading File...");
+  try {
+    const response = await api.post("/logo/add", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    console.log("<<< API SUCCESS: addLogoApi | Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "!!! API ERROR: addLogoApi | Details:",
+      error.response?.data || error.message,
+    );
+    throw error;
+  }
+};
+
+export const updateLogoApi = async (id, formData) => {
+  console.log(`>>> API CALL: updateLogoApi | ID: ${id} | Updating File...`);
+  try {
+    const response = await api.put(`/logo/update/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    console.log("<<< API SUCCESS: updateLogoApi | Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "!!! API ERROR: updateLogoApi | Details:",
+      error.response?.data || error.message,
+    );
+    throw error;
+  }
+};
+
+export const deleteLogoApi = async (id) => {
+  console.log(`>>> API CALL: deleteLogoApi | Target ID: ${id}`);
+  try {
+    const response = await api.delete(`/logo/delete/${id}`);
+    console.log("<<< API SUCCESS: deleteLogoApi | Response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "!!! API ERROR: deleteLogoApi | Details:",
+      error.response?.data || error.message,
+    );
+    throw error;
+  }
+};

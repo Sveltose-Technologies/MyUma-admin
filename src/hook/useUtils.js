@@ -1,22 +1,50 @@
-// Function ke bahar export karein taaki api.js ise use kar sake
 export const BASE_URL = "https://nrislaw.rxchartsquare.com";
 
 export const useUtils = () => {
+  const DEFAULT_IMAGE = "https://placehold.co/200x200?text=No+Image";
+
   const getImgURL = (path) => {
-    if (!path) return "https://placehold.co/200x200?text=No+Image";
-    if (path.startsWith("http")) return path;
-    const cleanPath = path.startsWith("/") ? path : `/${path}`;
-    return `${BASE_URL}${cleanPath}`;
+    try {
+      // ❌ null / undefined / empty
+      if (!path || typeof path !== "string") {
+        return DEFAULT_IMAGE;
+      }
+
+      // ✔️ Already full URL (http / https)
+      if (path.startsWith("http://") || path.startsWith("https://")) {
+        return path;
+      }
+
+      // ✔️ Base64 image
+      if (path.startsWith("data:image")) {
+        return path;
+      }
+
+      // ✔️ Remove extra spaces
+      const cleanPath = path.trim();
+
+      // ✔️ Add slash if missing
+      const finalPath = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
+
+      return `${BASE_URL}${finalPath}`;
+    } catch (error) {
+      console.error("Image URL error:", error);
+      return DEFAULT_IMAGE;
+    }
   };
 
   const formatDate = (date) => {
     if (!date) return "N/A";
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    try {
+      return new Date(date).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      });
+    } catch {
+      return "Invalid Date";
+    }
   };
 
-  return { getImgURL, formatDate, getAdminID, BASE_URL };
+  return { getImgURL, formatDate, BASE_URL };
 };

@@ -217,20 +217,6 @@ body {
 }
 
 /* Buttons */
-.btn-gold {
-  background-color: var(--gold);
-  color: var(--navy);
-  border: none;
-  padding: 12px 25px;
-  border-radius: 12px;
-  font-weight: 700;
-  transition: var(--transition);
-}
-
-.btn-gold:hover {
-  background-color: var(--navy);
-  color: var(--gold);
-}
 
 /* Dropdown Positioning */
 .dropdown-profile-menu {
