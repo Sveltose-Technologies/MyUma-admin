@@ -1,12 +1,18 @@
 import { lazy } from "react";
 
+
+// Lazy loading all components
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const Categories = lazy(() => import("../pages/Categories"));
-const Home = lazy(() => import("../pages/Home")); // Path sahi hona chahiye
-
+const Home = lazy(() => import("../pages/Home"));
+const EditProfile = lazy(() => import("../pages/EditProfile"));
+const BlogCategories = lazy(() => import("../pages/BlogCategories"));
+const Blogs = lazy(() => import("../pages/Blogs"));
+const LegalDocs = lazy(()=>import("../pages/LegalDocs"));
+const AboutUs = lazy(()=>import("../pages/AboutUs"))
 export const adminRoutes = [
   {
-    path: "", // This represents /admin
+    path: "",
     element: <Dashboard />,
     title: "Dashboard",
   },
@@ -16,8 +22,33 @@ export const adminRoutes = [
     title: "Categories",
   },
   {
-    path: "home", // This will be /admin/home
+    path: "home",
     element: <Home />,
     title: "Home",
+  },
+  {
+    path: "edit-profile",
+    element: <EditProfile />,
+    title: "Edit Profile",
+  },
+  {
+    path: "blogs",
+    element: <Blogs />,
+    title: "Blogs",
+  },
+  {
+    path: "blog-categories",
+    element: <BlogCategories />,
+    title: "Blog Categories",
+  },
+  {
+    path: "about-us",
+    element: <AboutUs />,
+    title: "AboutUS",
+  },
+  {
+    path: "/admin/legal-docs",
+    element: <LegalDocs />,
+    title: "LegalDocs",
   },
 ];

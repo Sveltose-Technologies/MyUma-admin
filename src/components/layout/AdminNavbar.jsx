@@ -1,13 +1,19 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux"; // Added useSelector
 import { useNavigate, Link } from "react-router-dom";
 import { setLogout } from "../../store/slices/authSlice";
+import { useUtils } from "../../hook/useUtils"; // Import your utility hook
 
 const AdminNavbar = ({ onToggle }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
+
+  // Get dynamic user data from Redux
+  const { user } = useSelector((state) => state.auth);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { getImgURL } = useUtils(); // Initialize image utility
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -23,6 +29,11 @@ const AdminNavbar = ({ onToggle }) => {
     dispatch(setLogout());
     navigate("/login");
   };
+
+  // Logic to handle avatar fallback (first letter of name)
+  const avatarLetter = user?.fullName
+    ? user.fullName.charAt(0).toUpperCase()
+    : "A";
 
   return (
     <div className="top-navbar">
@@ -47,15 +58,36 @@ const AdminNavbar = ({ onToggle }) => {
           onClick={() => setShowDropdown(!showDropdown)}
           style={{ cursor: "pointer" }}>
           <div className="text-end me-3 d-none d-sm-block">
-            <p className="m-0 fw-bold small text-navy">Raj</p>
-            <p className="m-0 text-muted" style={{ fontSize: "11px" }}>
-              Super Admin
+            {/* Dynamic Full Name */}
+            <p className="m-0 fw-bold small text-navy">
+              {user?.fullName || "Admin User"}
+            </p>
+            {/* Dynamic Role */}
+            <p
+              className="m-0 text-muted text-uppercase"
+              style={{ fontSize: "11px", fontWeight: "600" }}>
+              {user?.role || "Staff"}
             </p>
           </div>
 
-          <div className="profile-circle shadow-sm position-relative">
-            R
-            <span className="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle p-1"></span>
+          <div className="profile-circle shadow-sm position-relative overflow-hidden bg-gold d-flex align-items-center justify-content-center text-navy fw-bold">
+            {/* Dynamic Image logic */}
+            {user?.profileImage ? (
+              <img
+                src={getImgURL(user.profileImage)}
+                alt="Profile"
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                }} // Hide broken images
+              />
+            ) : (
+              <span>{avatarLetter}</span>
+            )}
+
+            <span
+              className="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle p-1"
+              style={{ zIndex: 2 }}></span>
           </div>
         </div>
 
@@ -64,15 +96,26 @@ const AdminNavbar = ({ onToggle }) => {
             className="dropdown-profile-menu shadow-lg animate-fade-in"
             style={{ right: 0 }}>
             <div className="dropdown-header-custom p-3 border-bottom">
-              <p className="m-0 fw-bold small">Manage Account</p>
+              <p className="m-0 fw-bold small text-navy">Manage Account</p>
+              <p
+                className="text-muted extra-small mb-0"
+                style={{ fontSize: "10px" }}>
+                {user?.email}
+              </p>
             </div>
-            <Link to="/admin/profile" className="dropdown-item-custom">
+
+            <Link
+              to="/admin/edit-profile"
+              className="dropdown-item-custom"
+              onClick={() => setShowDropdown(false)}>
               <i className="bi bi-person me-2"></i> Edit Profile
             </Link>
+
             <hr className="dropdown-divider m-0" />
+
             <button
               onClick={handleLogout}
-              className="dropdown-item-custom text-danger fw-bold">
+              className="dropdown-item-custom text-danger fw-bold border-0 bg-transparent w-100 text-start">
               <i className="bi bi-box-arrow-right me-2"></i> Logout
             </button>
           </div>

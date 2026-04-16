@@ -1,3 +1,4 @@
+//src/commom/customButton.jsx
 import React from "react";
 
 const CustomButton = ({
@@ -9,13 +10,12 @@ const CustomButton = ({
   className = "",
   disabled = false,
 }) => {
-  // Base styles to ensure both buttons are EXACTLY the same size
   const commonStyles = {
-    padding: "12px 25px", // Match your .btn-gold padding
+    padding: "12px 25px", 
     borderRadius: "12px",
     fontWeight: "700",
     fontSize: "16px",
-    height: "50px", // Fixed height ensures they match perfectly
+    height: "50px", 
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -26,7 +26,7 @@ const CustomButton = ({
   const variantStyles =
     variant === "gold"
       ? { backgroundColor: "var(--gold)", color: "var(--navy)" }
-      : { backgroundColor: "#e2e8f0", color: "var(--navy)" }; // Smooth grey for cancel
+      : { backgroundColor: "#e2e8f0", color: "var(--navy)" }; 
 
   return (
     <button

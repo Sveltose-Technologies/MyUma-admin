@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter } from "react-router-dom";
-import AppRouter from "./routes"; // Upar wala file
+import AppRouter from "./routes"; 
 import { ToastContainer } from "react-toastify";
 
 function App() {

@@ -1,10 +1,7 @@
 import { useState, useCallback } from "react";
 import { toast } from "react-toastify";
 
-/**
- * useCrud Hook
- * Updated to handle both Arrays and Single Objects (like Logos)
- */
+
 export const useCrud = (apiMethods) => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,31 +12,27 @@ export const useCrud = (apiMethods) => {
     try {
       const res = await apiMethods.getAll();
 
-      // Console log for debugging
+     
       console.log("Full API Response in Hook:", res);
 
-      // Extract raw data from known keys
+     
       const rawData =
         res?.categories ||
-        res?.homeBanner || // Backend key from your screenshot
-        res?.logo || // Singular key (Screenshot fix)
-        res?.logos || // Plural key
+        res?.homeBanner ||
+        res?.logo ||
+        res?.logos ||
         res?.blogCategories ||
         res?.blogs ||
+        res?.termcondition ||
+        res?.privacyPolicy ||
+        res?.aboutUs ||
         res?.data;
 
-      /**
-       * TRANSFORMATION LOGIC:
-       * 1. If rawData is already an array, use it.
-       * 2. If rawData is a single object (like your logo), wrap it in an array [rawData].
-       * 3. If response itself is an array, use res.
-       * 4. Otherwise, default to empty array [].
-       */
       let result = [];
       if (Array.isArray(rawData)) {
         result = rawData;
       } else if (rawData && typeof rawData === "object") {
-        result = [rawData]; // Convert single object to array for .map()
+        result = [rawData]; 
       } else if (Array.isArray(res)) {
         result = res;
       }
@@ -47,7 +40,7 @@ export const useCrud = (apiMethods) => {
       setData(result);
     } catch (err) {
       console.error("Error in fetchAll:", err);
-      // toast.error("Failed to fetch data");
+      
     } finally {
       setLoading(false);
     }

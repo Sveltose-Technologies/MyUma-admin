@@ -29,6 +29,30 @@ export const resetPasswordApi = async (resetData) => {
   const response = await api.put("/auth/reset-password", resetData);
   return response.data;
 };
+// Get User By ID API
+export const getUserByIdApi = async (id) => {
+  const response = await api.get(`/auth/get-by-id/${id}`);
+  return response.data;
+};
+// Update Profile API
+export const updateProfileApi = async (id, userData) => {
+  try {
+    console.log("API Call: updateProfileApi");
+    console.log("ID:", id);
+    console.log("User Data:", userData);
+
+    const response = await api.put(`/auth/update/${id}`, userData);
+
+    console.log("API Response:", response.data);
+
+    return response.data;
+  } catch (error) {
+    console.error("API Error:", error);
+    console.error("Error Response:", error.response);
+
+    throw error; // important to handle in component
+  }
+};
 
 // ==========================================
 // 4. BLOG CATEGORY APIS
@@ -251,4 +275,75 @@ export const deleteLogoApi = async (id) => {
     );
     throw error;
   }
+};
+
+
+// --- Terms & Conditions API ---
+export const getAllTermsApi = async () => {
+  const res = await api.get("/termcondition/get-all");
+  console.log("TC GET ALL:", res.data);
+  return res.data;
+};
+export const addTermsApi = async (data) => {
+  console.log("TC ADD PAYLOAD:", data);
+  const res = await api.post("/termcondition/add", data);
+  return res.data;
+};
+export const updateTermsApi = async (id, data) => {
+  console.log("TC UPDATE ID:", id, "PAYLOAD:", data);
+  const res = await api.put(`/termcondition/update/${id}`, data);
+  return res.data;
+};
+export const deleteTermsApi = async (id) => {
+  console.log("TC DELETE ID:", id);
+  const res = await api.delete(`/termcondition/delete/${id}`);
+  return res.data;
+};
+
+// --- Privacy Policy API ---
+export const getAllPrivacyApi = async () => {
+  const res = await api.get("/privacy-policy/get-all");
+  console.log("PRIVACY GET ALL:", res.data);
+  return res.data;
+};
+export const addPrivacyApi = async (data) => {
+  console.log("PRIVACY ADD PAYLOAD:", data);
+  const res = await api.post("/privacy-policy/add", data);
+  return res.data;
+};
+export const updatePrivacyApi = async (id, data) => {
+  console.log("PRIVACY UPDATE ID:", id, "PAYLOAD:", data);
+  const res = await api.put(`/privacy-policy/update/${id}`, data);
+  return res.data;
+};
+export const deletePrivacyApi = async (id) => {
+  console.log("PRIVACY DELETE ID:", id);
+  const res = await api.delete(`/privacy-policy/delete/${id}`);
+  return res.data;
+};
+
+
+// --- About Us API ---
+export const getAllAboutUsApi = async () => {
+  const res = await api.get("/aboutus/get-all");
+  console.log("ABOUTUS GET ALL RESPONSE:", res.data);
+  return res.data;
+};
+
+export const addAboutUsApi = async (data) => {
+  console.log("ABOUTUS ADD REQUEST PAYLOAD:", data);
+  const res = await api.post("/aboutus/add", data);
+  return res.data;
+};
+
+export const updateAboutUsApi = async (id, data) => {
+  console.log("ABOUTUS UPDATE REQUEST ID:", id, "PAYLOAD:", data);
+  const res = await api.put(`/aboutus/update/${id}`, data);
+  return res.data;
+};
+
+export const deleteAboutUsApi = async (id) => {
+  console.log("ABOUTUS DELETE REQUEST ID:", id);
+  const res = await api.delete(`/aboutus/delete/${id}`);
+  return res.data;
 };

@@ -130,7 +130,7 @@ const Home = () => {
                     <tr>
                       <th className="px-4 py-3">#</th>
                       <th>Preview</th>
-                      <th>Reference ID</th>
+                      {/* <th>Reference ID</th> */}
                       <th className="text-end px-4">Actions</th>
                     </tr>
                   </thead>
@@ -146,7 +146,6 @@ const Home = () => {
                             style={{ height: "40px" }}
                           />
                         </td>
-                        <td className="small text-muted">{item._id}</td>
                         <td className="text-end px-4">
                           <button
                             className="btn btn-sm btn-light border-0 me-2"
@@ -193,7 +192,7 @@ const Home = () => {
                       <th className="px-4 py-3">#</th>
                       <th>Banner</th>
                       <th>Content</th>
-                      <th>Created</th>
+                      {/* <th>Created</th> */}
                       <th className="text-end px-4">Actions</th>
                     </tr>
                   </thead>
@@ -216,9 +215,9 @@ const Home = () => {
                         <td className="small fw-bold">
                           {item.contant || "N/A"}
                         </td>
-                        <td className="small text-muted">
+                        {/* <td className="small text-muted">
                           {formatDate(item.createdAt)}
-                        </td>
+                        </td> */}
                         <td className="text-end px-4">
                           <button
                             className="btn btn-sm btn-light border-0 me-2"

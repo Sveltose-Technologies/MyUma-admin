@@ -6,9 +6,21 @@ const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
   const menu = [
     { name: "Dashboard", path: "/admin", icon: "bi-grid-1x2-fill" },
-     { name: "Home", path: "/admin/home", icon: "bi-house-fill" },
+    { name: "Home", path: "/admin/home", icon: "bi-house-fill" },
     { name: "Categories", path: "/admin/categories", icon: "bi-tags" },
-   
+    { name: "Blogs", path: "/admin/blogs", icon: "bi-tags" },
+    {
+      name: "Blog Categories",
+      path: "/admin/blog-categories",
+      icon: "bi-tags",
+    },
+
+    { name: "AboutUs", path: "/admin/about-us", icon: "bi-tags" },
+    {
+      name: "LegalDocs",
+      path: "/admin/legal-docs",
+      icon: "bi-tags",
+    },
   ];
 
   return (
