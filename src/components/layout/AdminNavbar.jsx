@@ -66,7 +66,7 @@ const AdminNavbar = ({ onToggle }) => {
             <p
               className="m-0 text-muted text-uppercase"
               style={{ fontSize: "11px", fontWeight: "600" }}>
-              {user?.role || "Staff"}
+              {user?.role || "Super Admin"}
             </p>
           </div>
 
