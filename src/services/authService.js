@@ -347,3 +347,82 @@ export const deleteAboutUsApi = async (id) => {
   const res = await api.delete(`/aboutus/delete/${id}`);
   return res.data;
 };
+
+// --- Pricing API ---
+export const getAllPricingApi = async () => {
+  const res = await api.get("/pricing/get-all");
+  console.log("PRICING GET ALL RESPONSE:", res.data);
+  return res.data;
+};
+
+export const addPricingApi = async (data) => {
+  console.log("PRICING ADD REQUEST PAYLOAD:", data);
+  const res = await api.post("/pricing/add", data);
+  return res.data;
+};
+
+export const updatePricingApi = async (id, data) => {
+  console.log("PRICING UPDATE REQUEST ID:", id, "PAYLOAD:", data);
+  const res = await api.put(`/pricing/update/${id}`, data);
+  return res.data;
+};
+
+export const deletePricingApi = async (id) => {
+  console.log("PRICING DELETE REQUEST ID:", id);
+  const res = await api.delete(`/pricing/delete/${id}`);
+  return res.data;
+};
+
+// --- Comment API ---
+export const getAllCommentsApi = async () => {
+  const res = await api.get("/comment/get-all");
+  console.log("COMMENT GET ALL RESPONSE:", res.data);
+  return res.data;
+};
+
+export const addCommentApi = async (data) => {
+  console.log("COMMENT SEND REQUEST PAYLOAD:", data);
+  const res = await api.post("/comment/send", data);
+  return res.data;
+};
+
+export const updateCommentApi = async (id, data) => {
+  console.log("COMMENT UPDATE REQUEST ID:", id, "PAYLOAD:", data);
+  const res = await api.put(`/comment/update/${id}`, data);
+  return res.data;
+};
+
+export const deleteCommentApi = async (id) => {
+  console.log("COMMENT DELETE REQUEST ID:", id);
+  const res = await api.delete(`/comment/delete/${id}`);
+  return res.data;
+};
+
+// --- New Listing API ---
+export const getAllListingsApi = async () => {
+  const res = await api.get("/newListing/get-all");
+  console.log("LISTING GET ALL RESPONSE:", res.data);
+  return res.data;
+};
+
+export const addListingApi = async (formData) => {
+  console.log("LISTING ADD REQUEST (Multipart)");
+  const res = await api.post("/newListing/add", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
+export const updateListingApi = async (id, formData) => {
+  console.log("LISTING UPDATE REQUEST ID:", id);
+  const res = await api.put(`/newListing/update/${id}`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
+export const deleteListingApi = async (id) => {
+  console.log("LISTING DELETE REQUEST ID:", id);
+  const res = await api.delete(`/newListing/delete/${id}`);
+  return res.data;
+};

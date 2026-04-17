@@ -26,6 +26,9 @@ export const useCrud = (apiMethods) => {
         res?.termcondition ||
         res?.privacyPolicy ||
         res?.aboutUs ||
+        res?.pricing ||
+        res?.comments ||
+        res?.newListing || 
         res?.data;
 
       let result = [];
