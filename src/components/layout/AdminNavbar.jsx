@@ -85,9 +85,7 @@ const AdminNavbar = ({ onToggle }) => {
               <span>{avatarLetter}</span>
             )}
 
-            <span
-              className="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle p-1"
-              style={{ zIndex: 2 }}></span>
+          
           </div>
         </div>
 

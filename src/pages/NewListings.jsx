@@ -220,7 +220,7 @@ const NewListings = () => {
                         className="form-control mb-2"
                         value={formData.title}
                         onChange={handleInputChange}
-                        required
+                     
                       />
                       <label className="small fw-bold text-muted">
                         CATEGORY
@@ -230,7 +230,7 @@ const NewListings = () => {
                         className="form-select mb-2"
                         value={formData.categoryId}
                         onChange={handleInputChange}
-                        required>
+                        >
                         <option value="">Select Category</option>
                         {categories.map((c) => (
                           <option key={c._id} value={c._id}>
@@ -264,7 +264,7 @@ const NewListings = () => {
                         className="form-control mb-2"
                         value={formData.address}
                         onChange={handleInputChange}
-                        required
+                        
                       />
                       <label className="small fw-bold text-muted">
                         PHONE / WHATSAPP
@@ -277,7 +277,7 @@ const NewListings = () => {
                           className="form-control mb-2"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          required
+                          
                         />
                         <input
                           type="text"

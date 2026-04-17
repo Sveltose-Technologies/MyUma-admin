@@ -150,7 +150,7 @@ const Categories = () => {
                     style={{ borderRadius: "12px" }}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    required
+                    
                   />
                 </div>
                 <div className="modal-footer border-0 p-4 pt-0">

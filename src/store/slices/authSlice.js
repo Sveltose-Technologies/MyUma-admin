@@ -8,35 +8,40 @@ const authSlice = createSlice({
     token: storage.getToken() || null,
     isAuthenticated: !!storage.getToken(),
     loading: false,
-    tempEmail: null, // Add this to store email for OTP/Reset flow
   },
   reducers: {
     setLogin: (state, action) => {
-      state.user = action.payload;
-      state.token = action.payload.token;
-      state.isAuthenticated = true;
-      storage.setToken(action.payload.token);
-      localStorage.setItem("admin_user", JSON.stringify(action.payload));
+      const payload = action.payload;
+
+      // Console ke mutabik data 'auth' key ke andar hai
+      const userData = payload.auth;
+      const token = payload.auth?.token;
+
+      console.log("Saving User:", userData);
+      console.log("Saving Token:", token);
+
+      state.user = userData;
+
+      if (token && token !== "undefined") {
+        state.token = token;
+        state.isAuthenticated = true;
+        storage.setToken(token); // Yeh line localStorage mein save karegi
+      }
+
+      // User data ko save karein
+      localStorage.setItem("admin_user", JSON.stringify(userData));
     },
     setLogout: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      state.tempEmail = null;
       storage.clear();
-      localStorage.removeItem("admin_user");
     },
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
-    // Add this missing export
-    setTempEmail: (state, action) => {
-      state.tempEmail = action.payload;
-    },
   },
 });
 
-// Make sure setTempEmail is included here
-export const { setLogin, setLogout, setLoading, setTempEmail } =
-  authSlice.actions;
+export const { setLogin, setLogout, setLoading } = authSlice.actions;
 export default authSlice.reducer;

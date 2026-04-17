@@ -27,20 +27,18 @@ const Login = () => {
 const handleLogin = async (e) => {
   e.preventDefault();
   dispatch(setLoading(true));
-
   try {
-    const data = await loginApi(credentials);
-    console.log("Login Response Data:", data); // Check karein token kahan hai
+    const response = await loginApi(credentials);
 
-    // Pura 'data' pass karein taaki token aur user dono mil sakein
-    if (data && (data.token || data.auth)) {
-     dispatch(setLogin(data));
+    // Check if the response contains user data (auth)
+    if (response && response.auth) {
+      // We pass the whole response to setLogin
+      dispatch(setLogin(response));
+
       toast.success("Login Successful!");
-
-      // Navigate ko thoda delay dein taaki Redux update ho jaye
-      setTimeout(() => {
-        navigate("/admin");
-      }, 100);
+      navigate("/admin");
+    } else {
+      toast.error("Login failed: User data missing in response");
     }
   } catch (error) {
     toast.error(error.response?.data?.message || "Invalid Email or Password");

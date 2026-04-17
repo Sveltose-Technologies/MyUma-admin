@@ -238,7 +238,7 @@ const Blogs = () => {
                           onChange={(e) =>
                             setFormData({ ...formData, title: e.target.value })
                           }
-                          required
+                          
                         />
                       </div>
 
@@ -255,7 +255,7 @@ const Blogs = () => {
                               blogCategoryId: e.target.value,
                             })
                           }
-                          required>
+                          >
                           <option value="">-- Select Category --</option>
                           {categories.length > 0 ? (
                             categories.map((c) => (
@@ -283,7 +283,7 @@ const Blogs = () => {
                               description: e.target.value,
                             })
                           }
-                          required
+                          
                         />
                       </div>
                     </div>

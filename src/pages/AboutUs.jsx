@@ -162,7 +162,7 @@ const AboutUs = () => {
                         className="form-control border-2 shadow-none"
                         defaultValue={editData?.email || ""}
                         placeholder="e.g. info@company.com"
-                        required
+                        
                       />
                     </div>
                     <div className="col-md-6 mb-3">
@@ -175,7 +175,6 @@ const AboutUs = () => {
                         className="form-control border-2 shadow-none"
                         defaultValue={editData?.webLink || ""}
                         placeholder="https://example.com"
-                        required
                       />
                     </div>
                     <div className="col-md-12">
@@ -188,7 +187,7 @@ const AboutUs = () => {
                         defaultValue={editData?.content || ""}
                         rows="8"
                         placeholder="Describe your company here..."
-                        required></textarea>
+                        ></textarea>
                     </div>
                   </div>
                 </div>
