@@ -277,7 +277,6 @@ export const deleteLogoApi = async (id) => {
   }
 };
 
-
 // --- Terms & Conditions API ---
 export const getAllTermsApi = async () => {
   const res = await api.get("/termcondition/get-all");
@@ -321,7 +320,6 @@ export const deletePrivacyApi = async (id) => {
   const res = await api.delete(`/privacy-policy/delete/${id}`);
   return res.data;
 };
-
 
 // --- About Us API ---
 export const getAllAboutUsApi = async () => {
@@ -422,7 +420,8 @@ export const updateListingApi = async (id, formData) => {
 };
 
 export const deleteListingApi = async (id) => {
-  console.log("LISTING DELETE REQUEST ID:", id);
+  console.log("API CALL: DELETE listing", id);
+
   const res = await api.delete(`/newListing/delete/${id}`);
   return res.data;
 };

@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux"; // Added useSelector
+import { useDispatch, useSelector } from "react-redux"; 
 import { useNavigate, Link } from "react-router-dom";
 import { setLogout } from "../../store/slices/authSlice";
-import { useUtils } from "../../hook/useUtils"; // Import your utility hook
+import { useUtils } from "../../hook/useUtils"; 
 
 const AdminNavbar = ({ onToggle }) => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -30,7 +30,6 @@ const AdminNavbar = ({ onToggle }) => {
     navigate("/login");
   };
 
-  // Logic to handle avatar fallback (first letter of name)
   const avatarLetter = user?.fullName
     ? user.fullName.charAt(0).toUpperCase()
     : "A";
@@ -38,9 +37,9 @@ const AdminNavbar = ({ onToggle }) => {
   return (
     <div className="top-navbar">
       <div className="d-flex align-items-center">
-        {/* HAMBURGER TOGGLE BUTTON */}
+        
         <button
-          className="btn btn-gold d-md-none me-3 border shadow-sm"
+          className="btn btn-gold d-md-none me-3  shadow-sm"
           onClick={onToggle}>
           <i className="bi bi-list fs-4"></i>
         </button>

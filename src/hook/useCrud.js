@@ -28,7 +28,7 @@ export const useCrud = (apiMethods) => {
         res?.aboutUs ||
         res?.pricing ||
         res?.comments ||
-        res?.newListing || 
+        res?.listings || 
         res?.data;
 
       let result = [];

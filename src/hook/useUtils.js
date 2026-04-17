@@ -5,17 +5,16 @@ export const useUtils = () => {
 
   const getImgURL = (path) => {
     try {
-      // ❌ null / undefined / empty
+     
       if (!path || typeof path !== "string") {
         return DEFAULT_IMAGE;
-      }
+      }  
 
-      // ✔️ Already full URL (http / https)
       if (path.startsWith("http://") || path.startsWith("https://")) {
         return path;
       }
 
-      // ✔️ Base64 image
+     
       if (path.startsWith("data:image")) {
         return path;
       }

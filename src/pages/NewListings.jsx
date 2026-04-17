@@ -9,7 +9,7 @@ import {
   addListingApi,
   updateListingApi,
   deleteListingApi,
-  getAllCategoriesApi, // Assuming this exists for the category dropdown
+  getAllCategoriesApi,
 } from "../services/authService";
 
 const LISTING_METHODS = {
@@ -48,10 +48,45 @@ const NewListings = () => {
     fetchAll();
     const fetchCats = async () => {
       const res = await getAllCategoriesApi();
-      setCategories(res?.categories || res?.data || []);
+      setCategories(res?.categories || []);
     };
     fetchCats();
   }, [fetchAll]);
+
+  const renderSocialIcons = (item) => {
+    const socials = [
+      { key: "facebook", icon: "bi-facebook", color: "#1877F2" },
+      { key: "instagram", icon: "bi-instagram", color: "#E4405F" },
+      { key: "twitter", icon: "bi-twitter-x", color: "#000000" },
+      { key: "linkedin", icon: "bi-linkedin", color: "#0A66C2" },
+      { key: "youtube", icon: "bi-youtube", color: "#FF0000" },
+      { key: "whatsappNo", icon: "bi-whatsapp", color: "#25D366", isWA: true },
+    ];
+
+    return (
+      <div className="d-flex gap-2">
+        {socials.map((s) => {
+          const value = item[s.key];
+          if (!value) return null;
+          const href = s.isWA
+            ? `https://wa.me/${value.replace(/\D/g, "")}`
+            : value.startsWith("http")
+              ? value
+              : `https://${value}`;
+          return (
+            <a
+              key={s.key}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: s.color, fontSize: "1.1rem" }}>
+              <i className={`bi ${s.icon}`}></i>
+            </a>
+          );
+        })}
+      </div>
+    );
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -78,19 +113,15 @@ const NewListings = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     const dataToSend = new FormData();
-    dataToSend.append("categoryId", formData.categoryId);
-    dataToSend.append("title", formData.title);
-    dataToSend.append("address", formData.address);
-    dataToSend.append("phone", formData.phone);
-    dataToSend.append("twitter", formData.twitter);
-    dataToSend.append("facebook", formData.facebook);
-    dataToSend.append("linkedin", formData.linkedin);
-    dataToSend.append("youtube", formData.youtube);
-    dataToSend.append("instagram", formData.instagram);
-    dataToSend.append("whatsappNo", formData.whatsappNo);
-    dataToSend.append("items", JSON.stringify(formData.items));
-
-    formData.images.forEach((file) => dataToSend.append("images", file));
+    Object.keys(formData).forEach((key) => {
+      if (key === "items") {
+        dataToSend.append(key, JSON.stringify(formData[key]));
+      } else if (key === "images") {
+        formData.images.forEach((file) => dataToSend.append("images", file));
+      } else {
+        dataToSend.append(key, formData[key]);
+      }
+    });
 
     const success = editId
       ? await updateItem(editId, dataToSend)
@@ -132,7 +163,7 @@ const NewListings = () => {
   return (
     <div className="container-fluid py-4">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="fw-bold text-navy m-0">Properties & Listings</h4>
+        <h4 className="fw-bold text-dark m-0">Properties & Listings</h4>
         <CustomButton onClick={() => openModal()}>
           <i className="bi bi-plus-lg me-2"></i> Add Listing
         </CustomButton>
@@ -140,67 +171,102 @@ const NewListings = () => {
 
       <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
-            <thead className="bg-navy text-white">
+          <table
+            className="table table-hover align-middle mb-0"
+            style={{ minWidth: "1200px" }}>
+            <thead className="bg-light text-secondary small text-uppercase">
               <tr>
-                <th className="px-4">Preview</th>
+                <th className="ps-4">Preview</th>
                 <th>Title</th>
                 <th>Category</th>
+                <th>Address</th>
                 <th>Phone</th>
-                <th className="text-end px-4">Actions</th>
+                <th>Social Media</th>
+                <th>Price Items</th>
+                <th className="text-end pe-4">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {pagination.paginatedData.map((item) => (
-                <tr key={item._id}>
-                  <td className="px-4">
-                    <img
-                      src={getImgURL(item.images?.[0])}
-                      alt=""
-                      className="rounded shadow-sm"
-                      style={{
-                        width: "50px",
-                        height: "40px",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </td>
-                  <td className="fw-bold text-navy">{item.title}</td>
-                  <td>
-                    <span className="badge bg-light text-dark border">
-                      {item.categoryId?.title || "N/A"}
-                    </span>
-                  </td>
-                  <td className="small">{item.phone}</td>
-                  <td className="text-end px-4">
-                    <button
-                      className="btn btn-sm btn-light border me-2"
-                      onClick={() => openModal(item)}>
-                      <i className="bi bi-pencil"></i>
-                    </button>
-                    <button
-                      className="btn btn-sm btn-light border"
-                      onClick={() => deleteItem(item._id)}>
-                      <i className="bi bi-trash text-danger"></i>
-                    </button>
+              {pagination.paginatedData?.length > 0 ? (
+                pagination.paginatedData.map((item) => (
+                  <tr key={item._id}>
+                    <td className="ps-4">
+                      <img
+                        src={getImgURL(item.images?.[0])}
+                        alt=""
+                        className="rounded shadow-sm"
+                        style={{
+                          width: "50px",
+                          height: "40px",
+                          objectFit: "cover",
+                        }}
+                      />
+                    </td>
+                    <td className="fw-bold text-dark">{item.title}</td>
+                    <td>
+                      <span className="text-black">
+                        {item.categoryId?.name || "N/A"}
+                      </span>
+                    </td>
+                    <td className="text-muted small">
+                      <div
+                        className="text-truncate"
+                        style={{ maxWidth: "150px" }}>
+                        <i className="bi bi-geo-alt me-1"></i> {item.address}
+                      </div>
+                    </td>
+                    <td className="small">{item.phone}</td>
+                    <td>{renderSocialIcons(item)}</td>
+                    <td>
+                      <span className="badge bg-light text-dark border">
+                        {Array.isArray(item.items) ? item.items.length : 0}{" "}
+                        Items
+                      </span>
+                    </td>
+                    <td className="text-end pe-4">
+                      <div className="d-flex justify-content-end gap-2">
+                        <button
+                          className="btn btn-sm btn-light border"
+                          onClick={() => openModal(item)}>
+                          <i className="bi bi-pencil text-primary"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-light border text-danger"
+                          onClick={() => deleteItem(item._id)}>
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="8" className="text-center py-5">
+                    {loading ? (
+                      <div className="spinner-border spinner-border-sm"></div>
+                    ) : (
+                      "No Data Found"
+                    )}
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
       </div>
-      <Pagination {...pagination} />
+      <div className="mt-4">
+        <Pagination {...pagination} />
+      </div>
 
       {showModal && (
         <div
           className="modal d-block"
-          style={{ background: "rgba(0,0,0,0.5)", zIndex: 1050 }}>
-          <div className="modal-dialog modal-xl modal-dialog-centered px-3">
+          style={{ background: "rgba(0,0,0,0.5)", zIndex: 1070 }}>
+          <div className="modal-dialog modal-xl modal-dialog-centered px-2">
             <div className="modal-content border-0 rounded-4 shadow-lg">
               <div className="modal-header border-0 p-4 pb-0">
                 <h5 className="fw-bold m-0">
-                  {editId ? "Update Listing" : "New Listing"}
+                  {editId ? "Update Listing" : "Create New Listing"}
                 </h5>
                 <button
                   className="btn-close"
@@ -210,36 +276,40 @@ const NewListings = () => {
                 <div
                   className="modal-body p-4"
                   style={{ maxHeight: "70vh", overflowY: "auto" }}>
-                  <div className="row g-3">
-                    {/* Basic Info */}
-                    <div className="col-md-4">
-                      <label className="small fw-bold text-muted">TITLE</label>
+                  <div className="row g-4">
+                    <div className="col-12 col-lg-4">
+                      <label className="small fw-bold text-muted mb-1 text-uppercase">
+                        Listing Title
+                      </label>
                       <input
                         type="text"
                         name="title"
-                        className="form-control mb-2"
+                        className="form-control mb-3"
                         value={formData.title}
                         onChange={handleInputChange}
-                     
+                        required
+                        placeholder="e.g. Luxury Apartment"
                       />
-                      <label className="small fw-bold text-muted">
-                        CATEGORY
+
+                      <label className="small fw-bold text-muted mb-1 text-uppercase">
+                        Category
                       </label>
                       <select
                         name="categoryId"
-                        className="form-select mb-2"
+                        className="form-select mb-3"
                         value={formData.categoryId}
                         onChange={handleInputChange}
-                        >
-                        <option value="">Select Category</option>
+                        required>
+                        <option value="">Choose Category</option>
                         {categories.map((c) => (
                           <option key={c._id} value={c._id}>
-                            {c.title}
+                            {c.name}
                           </option>
                         ))}
                       </select>
-                      <label className="small fw-bold text-muted">
-                        IMAGES (Multiple)
+
+                      <label className="small fw-bold text-muted mb-1 text-uppercase">
+                        Upload Photos
                       </label>
                       <input
                         type="file"
@@ -253,120 +323,131 @@ const NewListings = () => {
                         }
                       />
                     </div>
-                    {/* Contact & Social */}
-                    <div className="col-md-4 border-start">
-                      <label className="small fw-bold text-muted">
-                        ADDRESS
+
+                    <div className="col-12 col-lg-4 border-lg-start ps-lg-4">
+                      <label className="small fw-bold text-muted mb-1 text-uppercase">
+                        Location Address
                       </label>
                       <input
                         type="text"
                         name="address"
-                        className="form-control mb-2"
+                        className="form-control mb-3"
                         value={formData.address}
                         onChange={handleInputChange}
-                        
+                        required
+                        placeholder="Street, City, Country"
                       />
-                      <label className="small fw-bold text-muted">
-                        PHONE / WHATSAPP
+
+                      <label className="small fw-bold text-muted mb-1 text-uppercase">
+                        Contact Details
                       </label>
-                      <div className="d-flex gap-2">
-                        <input
-                          type="text"
-                          name="phone"
-                          placeholder="Phone"
-                          className="form-control mb-2"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          
-                        />
-                        <input
-                          type="text"
-                          name="whatsappNo"
-                          placeholder="WhatsApp"
-                          className="form-control mb-2"
-                          value={formData.whatsappNo}
-                          onChange={handleInputChange}
-                        />
+                      <div className="row g-2 mb-3">
+                        <div className="col-6">
+                          <input
+                            type="text"
+                            name="phone"
+                            placeholder="Phone"
+                            className="form-control"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            required
+                          />
+                        </div>
+                        <div className="col-6">
+                          <input
+                            type="text"
+                            name="whatsappNo"
+                            placeholder="WhatsApp"
+                            className="form-control"
+                            value={formData.whatsappNo}
+                            onChange={handleInputChange}
+                          />
+                        </div>
                       </div>
-                      <label className="small fw-bold text-muted">
-                        SOCIAL LINKS
+
+                      <label className="small fw-bold text-muted mb-1 text-uppercase">
+                        Social Media Links
                       </label>
-                      <div className="row g-1">
-                        {["facebook", "instagram", "linkedin", "youtube"].map(
-                          (social) => (
-                            <div className="col-6" key={social}>
-                              <input
-                                type="text"
-                                name={social}
-                                placeholder={social}
-                                className="form-control form-control-sm"
-                                value={formData[social]}
-                                onChange={handleInputChange}
-                              />
-                            </div>
-                          ),
-                        )}
+                      <div className="row g-2">
+                        {[
+                          "facebook",
+                          "instagram",
+                          "linkedin",
+                          "youtube",
+                          "twitter",
+                        ].map((social) => (
+                          <div className="col-6" key={social}>
+                            <input
+                              type="text"
+                              name={social}
+                              placeholder={social}
+                              className="form-control form-control-sm"
+                              value={formData[social]}
+                              onChange={handleInputChange}
+                            />
+                          </div>
+                        ))}
                       </div>
                     </div>
-                    {/* Dynamic Items List */}
-                    <div className="col-md-4 border-start">
+
+                    <div className="col-12 col-lg-4 border-lg-start ps-lg-4">
                       <div className="d-flex justify-content-between align-items-center mb-2">
-                        <label className="small fw-bold text-muted">
-                          PRICE LIST / ITEMS
+                        <label className="small fw-bold text-muted text-uppercase">
+                          Price List / Menu
                         </label>
                         <button
                           type="button"
-                          className="btn btn-sm btn-gold p-1"
+                          className="btn btn-sm btn-primary rounded-circle p-0"
+                          style={{ width: "24px", height: "24px" }}
                           onClick={addRow}>
-                          <i className="bi bi-plus-circle"></i>
+                          <i className="bi bi-plus"></i>
                         </button>
                       </div>
-                      {formData.items.map((item, index) => (
-                        <div className="d-flex gap-1 mb-1" key={index}>
-                          <input
-                            type="text"
-                            placeholder="Name"
-                            className="form-control form-control-sm"
-                            value={item.name}
-                            onChange={(e) =>
-                              handleItemChange(index, "name", e.target.value)
-                            }
-                          />
-                          <input
-                            type="text"
-                            placeholder="Price"
-                            className="form-control form-control-sm"
-                            value={item.price}
-                            onChange={(e) =>
-                              handleItemChange(index, "price", e.target.value)
-                            }
-                          />
-                          <button
-                            type="button"
-                            className="btn btn-sm btn-light text-danger"
-                            onClick={() => removeRow(index)}>
-                            <i className="bi bi-trash"></i>
-                          </button>
-                        </div>
-                      ))}
+                      <div
+                        className="pe-1"
+                        style={{ maxHeight: "250px", overflowY: "auto" }}>
+                        {formData.items.map((item, index) => (
+                          <div className="d-flex gap-1 mb-2" key={index}>
+                            <input
+                              type="text"
+                              placeholder="Item Name"
+                              className="form-control form-control-sm"
+                              value={item.name}
+                              onChange={(e) =>
+                                handleItemChange(index, "name", e.target.value)
+                              }
+                            />
+                            <input
+                              type="text"
+                              placeholder="Price"
+                              className="form-control form-control-sm"
+                              value={item.price}
+                              onChange={(e) =>
+                                handleItemChange(index, "price", e.target.value)
+                              }
+                            />
+                            <button
+                              type="button"
+                              className="btn btn-sm text-danger"
+                              onClick={() => removeRow(index)}>
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="modal-footer border-0 p-4 pt-0">
-                  <div className="d-flex w-100 gap-2">
-                    <CustomButton
-                      variant="cancel"
-                      className="w-100"
-                      onClick={() => setShowModal(false)}>
-                      Cancel
-                    </CustomButton>
-                    <CustomButton
-                      type="submit"
-                      loading={loading}
-                      className="w-100">
-                      Save Listing
-                    </CustomButton>
-                  </div>
+                <div className="modal-footer border-0 p-4 pt-0 d-flex justify-content-end gap-2">
+                  <CustomButton
+                    variant="cancel"
+                    type="button"
+                    onClick={() => setShowModal(false)}>
+                    Cancel
+                  </CustomButton>
+                  <CustomButton type="submit" loading={loading}>
+                    Submit Listing
+                  </CustomButton>
                 </div>
               </form>
             </div>

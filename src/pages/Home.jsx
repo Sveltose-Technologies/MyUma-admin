@@ -15,7 +15,6 @@ import {
   deleteHomeBannerApi,
 } from "../services/authService";
 
-// API Configs defined outside to prevent infinite loops
 const LOGO_METHODS = {
   getAll: getAllLogosApi,
   add: addLogoApi,
@@ -31,18 +30,18 @@ const BANNER_METHODS = {
 };
 
 const Home = () => {
-  const { getImgURL, formatDate } = useUtils();
-  const [activeTab, setActiveTab] = useState("logos"); // 'logos' or 'banners'
+  const { getImgURL } = useUtils();
+  const [activeTab, setActiveTab] = useState("logos");
 
-  // --- LOGO CRUD & PAGINATION ---
+  // --- LOGO CRUD ---
   const logoCrud = useCrud(LOGO_METHODS);
-  const logoPagination = usePagination(logoCrud.data, 5); // 5 per page
+  const logoPagination = usePagination(logoCrud.data, 5);
   const [logoModal, setLogoModal] = useState(false);
   const [editLogoId, setEditLogoId] = useState(null);
 
-  // --- BANNER CRUD & PAGINATION ---
+  // --- BANNER CRUD ---
   const bannerCrud = useCrud(BANNER_METHODS);
-  const bannerPagination = usePagination(bannerCrud.data, 5); // 5 per page
+  const bannerPagination = usePagination(bannerCrud.data, 5);
   const [bannerModal, setBannerModal] = useState(false);
   const [editBannerData, setEditBannerData] = useState(null);
 
@@ -51,7 +50,13 @@ const Home = () => {
     bannerCrud.fetchAll();
   }, []);
 
-  // --- HANDLERS ---
+  // Word Limit Logic (3 Words)
+  const limitWords = (text) => {
+    if (!text) return "N/A";
+    const words = text.split(" ");
+    return words.length > 3 ? words.slice(0, 3).join(" ") + "..." : text;
+  };
+
   const handleLogoSave = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
@@ -86,7 +91,7 @@ const Home = () => {
         </p>
       </div>
 
-      {/* Tabs Navigation */}
+      {/* Tabs Navigation - RESTORED UI */}
       <ul className="nav nav-pills mb-4 gap-2 bg-white p-2 rounded-4 shadow-sm d-inline-flex border">
         <li className="nav-item">
           <button
@@ -114,14 +119,19 @@ const Home = () => {
         </li>
       </ul>
 
-      {/* TABS CONTENT */}
       <div className="tab-content">
         {/* LOGO TAB */}
         {activeTab === "logos" && (
           <div className="animate-fade-in">
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5 className="fw-bold text-navy m-0">Logo List</h5>
-             
+              <CustomButton
+                onClick={() => {
+                  setEditLogoId(null);
+                  setLogoModal(true);
+                }}>
+                + Add Logo
+              </CustomButton>
             </div>
             <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
               <div className="table-responsive">
@@ -130,7 +140,6 @@ const Home = () => {
                     <tr>
                       <th className="px-4 py-3">#</th>
                       <th>Preview</th>
-                      {/* <th>Reference ID</th> */}
                       <th className="text-end px-4">Actions</th>
                     </tr>
                   </thead>
@@ -191,8 +200,9 @@ const Home = () => {
                     <tr>
                       <th className="px-4 py-3">#</th>
                       <th>Banner</th>
-                      <th>Content</th>
-                      {/* <th>Created</th> */}
+                      <th>Tag</th>
+                      <th>Title</th>
+                      <th>Description</th>
                       <th className="text-end px-4">Actions</th>
                     </tr>
                   </thead>
@@ -206,18 +216,23 @@ const Home = () => {
                             alt="Banner"
                             className="rounded shadow-sm"
                             style={{
-                              width: "100px",
-                              height: "50px",
+                              width: "80px",
+                              height: "40px",
                               objectFit: "cover",
                             }}
                           />
                         </td>
-                        <td className="small fw-bold">
-                          {item.contant || "N/A"}
+                        <td>
+                          <span className="badge bg-light text-dark border">
+                            {item.tag || "N/A"}
+                          </span>
                         </td>
-                        {/* <td className="small text-muted">
-                          {formatDate(item.createdAt)}
-                        </td> */}
+                        <td className="small fw-bold">
+                          {limitWords(item.title)}
+                        </td>
+                        <td className="small text-muted">
+                          {limitWords(item.contant)}
+                        </td>
                         <td className="text-end px-4">
                           <button
                             className="btn btn-sm btn-light border-0 me-2"
@@ -253,7 +268,7 @@ const Home = () => {
             backdropFilter: "blur(4px)",
           }}>
           <div className="modal-dialog modal-dialog-centered px-3">
-            <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div className="modal-content border-0 rounded-4 shadow-lg">
               <div className="modal-header border-0 p-4 pb-0">
                 <h5 className="fw-bold text-navy m-0">
                   {editLogoId ? "Update Logo" : "New Logo"}
@@ -307,7 +322,7 @@ const Home = () => {
             background: "rgba(0,0,0,0.5)",
             backdropFilter: "blur(4px)",
           }}>
-          <div className="modal-dialog modal-dialog-centered px-3">
+          <div className="modal-dialog modal-lg modal-dialog-centered px-3">
             <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
               <div className="modal-header border-0 p-4 pb-0">
                 <h5 className="fw-bold text-navy m-0">
@@ -319,28 +334,54 @@ const Home = () => {
               </div>
               <form onSubmit={handleBannerSave}>
                 <div className="modal-body p-4">
-                  <div className="mb-3">
-                    <label className="small fw-bold text-muted">
-                      BANNER IMAGE
-                    </label>
-                    <input
-                      type="file"
-                      name="bannerImage"
-                      className="form-control border-2 shadow-none"
-                      required={!editBannerData}
-                      accept="image/*"
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="small fw-bold text-muted">
-                      BANNER CONTENT
-                    </label>
-                    <textarea
-                      name="contant"
-                      className="form-control border-2 shadow-none"
-                      defaultValue={editBannerData?.contant || ""}
-                      rows="3"
-                      required></textarea>
+                  <div className="row g-3">
+                    <div className="col-md-6">
+                      <label className="small fw-bold text-muted">
+                        BANNER IMAGE
+                      </label>
+                      <input
+                        type="file"
+                        name="bannerImage"
+                        className="form-control border-2 shadow-none"
+                        required={!editBannerData}
+                        accept="image/*"
+                      />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="small fw-bold text-muted">
+                        TAG LINE
+                      </label>
+                      <input
+                        type="text"
+                        name="tag"
+                        className="form-control border-2 shadow-none"
+                        defaultValue={editBannerData?.tag || ""}
+                        required
+                      />
+                    </div>
+                    <div className="col-12">
+                      <label className="small fw-bold text-muted">
+                        BANNER TITLE
+                      </label>
+                      <input
+                        type="text"
+                        name="title"
+                        className="form-control border-2 shadow-none"
+                        defaultValue={editBannerData?.title || ""}
+                        required
+                      />
+                    </div>
+                    <div className="col-12">
+                      <label className="small fw-bold text-muted">
+                        DESCRIPTION (CONTANT)
+                      </label>
+                      <textarea
+                        name="contant"
+                        className="form-control border-2 shadow-none"
+                        defaultValue={editBannerData?.contant || ""}
+                        rows="3"
+                        required></textarea>
+                    </div>
                   </div>
                 </div>
                 <div className="modal-footer border-0 p-4 pt-0">

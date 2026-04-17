@@ -10,6 +10,8 @@ const BlogCategories = lazy(() => import("../pages/BlogCategories"));
 const Blogs = lazy(() => import("../pages/Blogs"));
 const LegalDocs = lazy(()=>import("../pages/LegalDocs"));
 const AboutUs = lazy(()=>import("../pages/AboutUs"))
+const NewListings = lazy(() => import("../pages/NewListings"));
+
 export const adminRoutes = [
   {
     path: "",
@@ -25,6 +27,11 @@ export const adminRoutes = [
     path: "home",
     element: <Home />,
     title: "Home",
+  },
+  {
+    path: "listings",
+    element: <NewListings />,
+    title: "Properties & Listings",
   },
   {
     path: "edit-profile",

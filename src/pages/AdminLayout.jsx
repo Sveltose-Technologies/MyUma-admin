@@ -17,12 +17,11 @@ const AdminLayout = () => {
         </div>
       </div>
 
-      {/* Dark overlay fix */}
       {isSidebarOpen && (
         <div
           className="modal-backdrop fade show d-md-none"
-          onClick={() => setIsSidebarOpen(false)} 
-          style={{ zIndex: 1050, cursor: "pointer" }}></div>
+          onClick={() => setIsSidebarOpen(false)}
+          style={{ zIndex: 1050, cursor: "pointer", opacity: 0.5 }}></div>
       )}
     </div>
   );
