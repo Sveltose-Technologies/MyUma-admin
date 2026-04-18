@@ -349,3 +349,54 @@ export const deleteContactUsApi = async (id) => {
   const res = await api.delete(`/contactus/delete/${id}`);
   return res.data;
 };
+// --- Booknow API ---
+
+export const getAllBooknowApi = async () => {
+  const res = await api.get("/booknow/get-all");
+  console.log("BOOKNOW GET ALL RESPONSE:", res.data);
+  return res.data;
+};
+
+export const addBooknowApi = async (data) => {
+  console.log("BOOKNOW ADD REQUEST:", data);
+  const res = await api.post("/booknow/add", data);
+  return res.data;
+};
+
+export const updateBooknowApi = async (id, data) => {
+  console.log("BOOKNOW UPDATE REQUEST ID:", id, "DATA:", data);
+  const res = await api.put(`/booknow/update/${id}`, data);
+  return res.data;
+};
+
+export const deleteBooknowApi = async (id) => {
+  console.log("API CALL: DELETE booking", id);
+  const res = await api.delete(`/booknow/delete/${id}`);
+  return res.data;
+};
+
+// --- Rating API ---
+
+export const getAllRatingsApi = async () => {
+  const res = await api.get("/rating/get-all");
+  console.log("RATING GET ALL RESPONSE:", res.data);
+  return res.data;
+};
+
+export const addRatingApi = async (data) => {
+  console.log("RATING ADD REQUEST:", data);
+  const res = await api.post("/rating/add", data);
+  return res.data;
+};
+
+export const updateRatingApi = async (id, data) => {
+  console.log("RATING UPDATE REQUEST ID:", id, "DATA:", data);
+  const res = await api.put(`/rating/update/${id}`, data);
+  return res.data;
+};
+
+export const deleteRatingApi = async (id) => {
+  console.log("API CALL: DELETE rating", id);
+  const res = await api.delete(`/rating/delete/${id}`);
+  return res.data;
+};

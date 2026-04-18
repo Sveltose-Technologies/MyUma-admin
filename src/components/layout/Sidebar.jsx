@@ -6,6 +6,8 @@ const Sidebar = ({ isOpen, onClose }) => {
   const menu = [
     { name: "Dashboard", path: "/admin", icon: "bi-grid-1x2-fill" },
     { name: "Home", path: "/admin/home", icon: "bi-house-fill" },
+    { name: "About Us", path: "/admin/about-us", icon: "bi-info-circle" },
+
     { name: "Categories", path: "/admin/categories", icon: "bi-tags" },
     { name: "New Listings", path: "/admin/listings", icon: "bi-building-add" },
     { name: "Blogs", path: "/admin/blogs", icon: "bi-newspaper" },
@@ -14,10 +16,9 @@ const Sidebar = ({ isOpen, onClose }) => {
       path: "/admin/blog-categories",
       icon: "bi-collection",
     },
-    { name: "About Us", path: "/admin/about-us", icon: "bi-info-circle" },
-    { name: "Comments", path: "/admin/comments", icon: "bi-chat-dots" },
 
     { name: "Pricing", path: "/admin/pricing", icon: "bi-currency-dollar" },
+    { name: "Comments", path: "/admin/comments", icon: "bi-chat-dots" },
 
     {
       name: "Legal Docs",

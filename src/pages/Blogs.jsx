@@ -164,7 +164,7 @@ const Blogs = () => {
                     </span>
                   </td>
                   {/* CLEAN 4 WORD DESCRIPTION PREVIEW */}
-                  <td className="small text-muted fst-italic">
+                  <td className="small text-muted">
                     {getPreviewText(item.description)}
                   </td>
                   <td className="text-end px-4 text-nowrap">
