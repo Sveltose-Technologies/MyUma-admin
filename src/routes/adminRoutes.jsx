@@ -11,7 +11,9 @@ const Blogs = lazy(() => import("../pages/Blogs"));
 const LegalDocs = lazy(()=>import("../pages/LegalDocs"));
 const AboutUs = lazy(()=>import("../pages/AboutUs"))
 const NewListings = lazy(() => import("../pages/NewListings"));
-
+const Pricing = lazy(() => import("../pages/Pricing"));
+const Comments = lazy(() => import("../pages/Comments"));
+const FooterText = lazy(() => import("../pages/FooterText"));
 export const adminRoutes = [
   {
     path: "",
@@ -54,8 +56,23 @@ export const adminRoutes = [
     title: "AboutUS",
   },
   {
+    path: "pricing",
+    element: <Pricing />,
+    title: "Pricing Plans",
+  },
+  {
+    path: "comments",
+    element: <Comments />,
+    title: "User Comments",
+  },
+  {
     path: "/admin/legal-docs",
     element: <LegalDocs />,
     title: "LegalDocs",
+  },
+  {
+    path: "footer-text",
+    element: <FooterText />,
+    title: "Footer Text",
   },
 ];

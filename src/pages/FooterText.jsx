@@ -5,41 +5,44 @@ import Pagination from "../components/common/Pagination";
 import CustomButton from "../components/common/CustomButton";
 import TextEditor from "../components/common/TextEditor";
 import {
-  getAllAboutUsApi,
-  addAboutUsApi,
-  updateAboutUsApi,
-  deleteAboutUsApi,
+  getAllFooterApi,
+  addFooterApi,
+  updateFooterApi,
+  deleteFooterApi,
 } from "../services/authService";
 
-const ABOUT_METHODS = {
-  getAll: getAllAboutUsApi,
-  add: addAboutUsApi,
-  update: updateAboutUsApi,
-  delete: deleteAboutUsApi,
+const FOOTER_METHODS = {
+  getAll: getAllFooterApi,
+  add: addFooterApi,
+  update: updateFooterApi,
+  delete: deleteFooterApi,
 };
 
-const AboutUs = () => {
+const FooterText = () => {
   const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
-    useCrud(ABOUT_METHODS);
+    useCrud(FOOTER_METHODS);
   const pagination = usePagination(data, 5);
 
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
 
   const [formData, setFormData] = useState({
-    webLink: "",
-    email: "",
     content: "",
+    address: "",
+    email: "",
+    contactNo: "",
   });
 
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
-  // Helper to show exactly 5 words
+  // Clean 5-word preview helper
   const getPreviewText = (html) => {
-    const plainText = html.replace(/<[^>]*>/g, " ").trim(); // Remove HTML tags
-    const words = plainText.split(/\s+/);
+    if (!html) return "";
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const plainText = doc.body.textContent || "";
+    const words = plainText.trim().split(/\s+/);
     return words.length > 5 ? words.slice(0, 5).join(" ") + "..." : plainText;
   };
 
@@ -55,76 +58,90 @@ const AboutUs = () => {
     if (item) {
       setEditId(item._id);
       setFormData({
-        webLink: item.webLink || "",
-        email: item.email || "",
         content: item.content || "",
+        address: item.address || "",
+        email: item.email || "",
+        contactNo: item.contactNo || "",
       });
     } else {
       setEditId(null);
-      setFormData({ webLink: "", email: "", content: "" });
+      setFormData({ content: "", address: "", email: "", contactNo: "" });
     }
     setShowModal(true);
   };
 
   return (
     <div className="container-fluid py-3 py-md-4">
+      {/* Header Section */}
       <div className="mb-4">
-        <h4 className="fw-bold text-navy">About Us Management</h4>
+        <h4 className="fw-bold text-navy">Footer Management</h4>
         <p className="text-muted small">
-          Edit the company profile, contact email, and website links
+          Manage website footer details like contact info and address
         </p>
       </div>
 
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5 className="fw-bold text-navy m-0">About Content</h5>
+        <h5 className="fw-bold text-navy m-0">Footer Information</h5>
         <CustomButton onClick={() => openModal()}>
-          <i className="bi bi-plus-lg me-2"></i> Add About Info
+          <i className="bi bi-plus-lg me-2"></i> Add Footer Info
         </CustomButton>
       </div>
 
+      {/* Table Section */}
       <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0 text-nowrap">
             <thead style={{ background: "var(--navy)", color: "white" }}>
-              <tr>
+              <tr className="small text-uppercase">
                 <th className="px-4 py-3">#</th>
                 <th>Email</th>
-                <th>Web Link</th>
+                <th>Contact</th>
+                <th>Address</th>
                 <th>Content Preview</th>
                 <th className="text-end px-4">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {pagination.paginatedData.map((item, i) => (
-                <tr key={item._id}>
-                  <td className="px-4 text-muted">
-                    {(pagination.currentPage - 1) * 5 + (i + 1)}
-                  </td>
-                  <td className="fw-bold text-navy">{item.email}</td>
-                  <td className="small text-info">{item.webLink}</td>
-                  <td className="small text-muted">
-                    {getPreviewText(item.content)}
-                  </td>
-                  <td className="text-end px-4">
-                    <button
-                      className="btn btn-sm btn-light border-0 me-2 shadow-sm"
-                      onClick={() => openModal(item)}>
-                      <i className="bi bi-pencil-square text-info"></i>
-                    </button>
-                    <button
-                      className="btn btn-sm btn-light border-0 shadow-sm"
-                      onClick={() => deleteItem(item._id)}>
-                      <i className="bi bi-trash3 text-danger"></i>
-                    </button>
+              {loading && data.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-5">
+                    <div className="spinner-border text-gold"></div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                pagination.paginatedData.map((item, i) => (
+                  <tr key={item._id}>
+                    <td className="px-4 text-muted">
+                      {(pagination.currentPage - 1) * 5 + (i + 1)}
+                    </td>
+                    <td className="fw-bold text-navy">{item.email}</td>
+                    <td className="small">{item.contactNo}</td>
+                    <td className="small text-muted">{item.address}</td>
+                    <td className="small text-muted">
+                      {getPreviewText(item.content)}
+                    </td>
+                    <td className="text-end px-4">
+                      <button
+                        className="btn btn-sm btn-light border-0 me-2 shadow-sm"
+                        onClick={() => openModal(item)}>
+                        <i className="bi bi-pencil-square text-info"></i>
+                      </button>
+                      <button
+                        className="btn btn-sm btn-light border-0 shadow-sm"
+                        onClick={() => deleteItem(item._id)}>
+                        <i className="bi bi-trash3 text-danger"></i>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
       <Pagination {...pagination} />
 
+      {/* Footer Modal */}
       {showModal && (
         <div
           className="modal d-block"
@@ -137,7 +154,7 @@ const AboutUs = () => {
             <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
               <div className="modal-header border-0 p-4 pb-0">
                 <h5 className="fw-bold text-navy m-0">
-                  {editId ? "Update About Us" : "New About Entry"}
+                  {editId ? "Update Footer" : "New Footer Entry"}
                 </h5>
                 <button
                   className="btn-close shadow-none"
@@ -147,12 +164,12 @@ const AboutUs = () => {
                 <div className="modal-body p-4">
                   <div className="row g-3">
                     <div className="col-md-6">
-                      <label className="small fw-bold text-muted mb-2">
-                        EMAIL
+                      <label className="small fw-bold text-muted mb-2 text-uppercase">
+                        Email Address
                       </label>
                       <input
                         type="email"
-                        className="form-control border-2 shadow-none"
+                        className="form-control border-2 shadow-none rounded-3"
                         value={formData.email}
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
@@ -161,22 +178,39 @@ const AboutUs = () => {
                       />
                     </div>
                     <div className="col-md-6">
-                      <label className="small fw-bold text-muted mb-2">
-                        WEB LINK
+                      <label className="small fw-bold text-muted mb-2 text-uppercase">
+                        Contact No
                       </label>
                       <input
-                        type="url"
-                        className="form-control border-2 shadow-none"
-                        value={formData.webLink}
+                        type="text"
+                        className="form-control border-2 shadow-none rounded-3"
+                        value={formData.contactNo}
                         onChange={(e) =>
-                          setFormData({ ...formData, webLink: e.target.value })
+                          setFormData({
+                            ...formData,
+                            contactNo: e.target.value,
+                          })
                         }
                         required
                       />
                     </div>
                     <div className="col-12">
-                      <label className="small fw-bold text-muted mb-2">
-                        CONTENT
+                      <label className="small fw-bold text-muted mb-2 text-uppercase">
+                        Physical Address
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control border-2 shadow-none rounded-3"
+                        value={formData.address}
+                        onChange={(e) =>
+                          setFormData({ ...formData, address: e.target.value })
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="col-12">
+                      <label className="small fw-bold text-muted mb-2 text-uppercase">
+                        Footer Content (Description)
                       </label>
                       <TextEditor
                         value={formData.content}
@@ -202,7 +236,7 @@ const AboutUs = () => {
                         type="submit"
                         loading={loading}
                         className="w-100">
-                        Save
+                        {editId ? "Update" : "Save"}
                       </CustomButton>
                     </div>
                   </div>
@@ -216,4 +250,4 @@ const AboutUs = () => {
   );
 };
 
-export default AboutUs;
+export default FooterText;

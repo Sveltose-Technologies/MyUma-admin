@@ -2,13 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useCrud } from "../hook/useCrud";
 import { usePagination } from "../hook/usePagination";
 import Pagination from "../components/common/Pagination";
-import CustomButton from "../components/common/CustomButton";
+import CustomButton from "../components/common/CustomButton"; // Path from your code
 import {
   getAllCommentsApi,
   addCommentApi,
   updateCommentApi,
   deleteCommentApi,
-  getAllBlogsApi, // To populate blog dropdown
+  getAllBlogsApi,
 } from "../services/authService";
 
 const COMMENT_METHODS = {
@@ -73,6 +73,14 @@ const Comments = () => {
     setShowModal(true);
   };
 
+  // --- FIX FOR UNKNOWN BLOG TITLE ---
+  const getBlogTitle = (blogIdField) => {
+    // Check if blogId is an object or a string (from your console, it is a string)
+    const id = blogIdField?._id || blogIdField;
+    const found = blogs.find((b) => b._id === id);
+    return found ? found.title : "Unknown Blog";
+  };
+
   return (
     <div className="container-fluid py-3 py-md-4">
       <div className="mb-4">
@@ -84,6 +92,7 @@ const Comments = () => {
 
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h5 className="fw-bold text-navy m-0">All Comments</h5>
+        {/* Swapped to CustomButton */}
         <CustomButton onClick={() => openModal()}>
           <i className="bi bi-chat-left-text me-2"></i> Add Comment
         </CustomButton>
@@ -120,7 +129,8 @@ const Comments = () => {
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                       }}>
-                      {item.blogId?.title || "Unknown Blog"}
+                      {/* FIXED: Using the lookup function */}
+                      {getBlogTitle(item.blogId)}
                     </td>
                     <td
                       className="small text-muted text-wrap"
@@ -142,13 +152,6 @@ const Comments = () => {
                   </tr>
                 ))
               )}
-              {!loading && data.length === 0 && (
-                <tr>
-                  <td colSpan="4" className="text-center py-5 text-muted">
-                    No comments found
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
@@ -157,82 +160,90 @@ const Comments = () => {
 
       {/* Comment Modal */}
       {showModal && (
-        <div
-          className="modal d-block"
-          style={{
-            background: "rgba(0,0,0,0.5)",
-            backdropFilter: "blur(4px)",
-          }}>
-          <div className="modal-dialog modal-dialog-centered px-3">
-            <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
-              <div className="modal-header border-0 p-4 pb-0">
-                <h5 className="fw-bold text-navy m-0">
-                  {editData ? "Edit Comment" : "New Comment"}
-                </h5>
-                <button
-                  className="btn-close shadow-none"
-                  onClick={() => setShowModal(false)}></button>
+        <>
+          <div
+            className="modal fade show d-block"
+            tabIndex="-1"
+            style={{
+              background: "rgba(0,0,0,0.5)",
+              backdropFilter: "blur(4px)",
+              zIndex: 1060, // Higher than sidebar
+            }}>
+            <div className="modal-dialog modal-dialog-centered px-3">
+              <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                <div className="modal-header border-0 p-4 pb-0">
+                  <h5 className="fw-bold text-navy m-0">
+                    {editData ? "Edit Comment" : "New Comment"}
+                  </h5>
+                  <button
+                    className="btn-close shadow-none"
+                    onClick={() => setShowModal(false)}></button>
+                </div>
+                <form onSubmit={handleSave}>
+                  <div className="modal-body p-4">
+                    <div className="mb-3">
+                      <label className="small fw-bold text-muted">
+                        SELECT BLOG
+                      </label>
+                      <select
+                        className="form-select border-2 shadow-none"
+                        value={formData.blogId}
+                        onChange={(e) =>
+                          setFormData({ ...formData, blogId: e.target.value })
+                        }
+                        required>
+                        <option value="">-- Choose a Blog Post --</option>
+                        {blogs.map((blog) => (
+                          <option key={blog._id} value={blog._id}>
+                            {blog.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="mb-0">
+                      <label className="small fw-bold text-muted">
+                        COMMENT CONTENT
+                      </label>
+                      <textarea
+                        className="form-control border-2 shadow-none"
+                        rows="5"
+                        value={formData.comment}
+                        onChange={(e) =>
+                          setFormData({ ...formData, comment: e.target.value })
+                        }
+                        placeholder="Write the comment here..."
+                        required></textarea>
+                    </div>
+                  </div>
+                  <div className="modal-footer border-0 p-4 pt-0">
+                    <div className="row w-100 g-2 m-0">
+                      <div className="col-6">
+                        <CustomButton
+                          variant="cancel"
+                          className="w-100"
+                          onClick={() => setShowModal(false)}>
+                          Cancel
+                        </CustomButton>
+                      </div>
+                      <div className="col-6">
+                        <CustomButton
+                          type="submit"
+                          loading={loading}
+                          className="w-100">
+                          Send Comment
+                        </CustomButton>
+                      </div>
+                    </div>
+                  </div>
+                </form>
               </div>
-              <form onSubmit={handleSave}>
-                <div className="modal-body p-4">
-                  <div className="mb-3">
-                    <label className="small fw-bold text-muted">
-                      SELECT BLOG
-                    </label>
-                    <select
-                      className="form-select border-2 shadow-none"
-                      value={formData.blogId}
-                      onChange={(e) =>
-                        setFormData({ ...formData, blogId: e.target.value })
-                      }
-                      required>
-                      <option value="">-- Choose a Blog Post --</option>
-                      {blogs.map((blog) => (
-                        <option key={blog._id} value={blog._id}>
-                          {blog.title}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="mb-0">
-                    <label className="small fw-bold text-muted">
-                      COMMENT CONTENT
-                    </label>
-                    <textarea
-                      className="form-control border-2 shadow-none"
-                      rows="5"
-                      value={formData.comment}
-                      onChange={(e) =>
-                        setFormData({ ...formData, comment: e.target.value })
-                      }
-                      placeholder="Write the comment here..."
-                      required></textarea>
-                  </div>
-                </div>
-                <div className="modal-footer border-0 p-4 pt-0">
-                  <div className="row w-100 g-2 m-0">
-                    <div className="col-6">
-                      <CustomButton
-                        variant="cancel"
-                        className="w-100"
-                        onClick={() => setShowModal(false)}>
-                        Cancel
-                      </CustomButton>
-                    </div>
-                    <div className="col-6">
-                      <CustomButton
-                        type="submit"
-                        loading={loading}
-                        className="w-100">
-                        Send Comment
-                      </CustomButton>
-                    </div>
-                  </div>
-                </div>
-              </form>
             </div>
           </div>
-        </div>
+          {/* Backdrop ensures it stays above sidebar */}
+          <div
+            className="modal-backdrop fade show"
+            style={{ zIndex: 1050 }}></div>
+        </>
       )}
     </div>
   );

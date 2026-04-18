@@ -15,6 +15,10 @@ const Sidebar = ({ isOpen, onClose }) => {
       icon: "bi-collection",
     },
     { name: "About Us", path: "/admin/about-us", icon: "bi-info-circle" },
+    { name: "Comments", path: "/admin/comments", icon: "bi-chat-dots" },
+
+    { name: "Pricing", path: "/admin/pricing", icon: "bi-currency-dollar" },
+
     {
       name: "Legal Docs",
       path: "/admin/legal-docs",
