@@ -19,11 +19,17 @@ const Sidebar = ({ isOpen, onClose }) => {
 
     { name: "Pricing", path: "/admin/pricing", icon: "bi-currency-dollar" },
     { name: "Comments", path: "/admin/comments", icon: "bi-chat-dots" },
+    { name: "ContactUs", path: "/admin/contact-us", icon: "bi-telephone" },
 
-    {
+    {  
       name: "Legal Docs",
       path: "/admin/legal-docs",
       icon: "bi-file-earmark-lock",
+    },
+    {
+      name: "Footer Text",
+      path: "/admin/footer-text",
+      icon: "bi-file-text",
     },
   ];
 
@@ -50,7 +56,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             <Link
               key={item.path}
               to={item.path}
-              onClick={onClose} // Mobile par click karte hi sidebar close hoga
+              onClick={onClose}
               className={`nav-link-item ${location.pathname === item.path ? "active" : ""}`}
               style={{ textDecoration: "none" }}>
               <i className={item.icon}></i>

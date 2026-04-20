@@ -92,7 +92,7 @@ const ContactUs = () => {
         <h5 className="fw-bold text-navy m-0">Inquiry List</h5>
         <CustomButton
           onClick={() => openModal()}
-          className="w-100 w-sm-auto shadow-sm">
+          className="w-20 w-sm-auto shadow-sm">
           <i className="bi bi-person-plus me-2"></i> Add Inquiry
         </CustomButton>
       </div>

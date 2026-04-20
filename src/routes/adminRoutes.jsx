@@ -14,6 +14,7 @@ const NewListings = lazy(() => import("../pages/NewListings"));
 const Pricing = lazy(() => import("../pages/Pricing"));
 const Comments = lazy(() => import("../pages/Comments"));
 const FooterText = lazy(() => import("../pages/FooterText"));
+const ContactUs = lazy(()=>import("../pages/ContactUs"))
 export const adminRoutes = [
   {
     path: "",
@@ -69,6 +70,11 @@ export const adminRoutes = [
     path: "/admin/legal-docs",
     element: <LegalDocs />,
     title: "LegalDocs",
+  },
+  {
+    path: "contact-us",
+    element: <ContactUs />,
+    title: "ContactUs",
   },
   {
     path: "footer-text",
