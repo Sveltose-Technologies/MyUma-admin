@@ -400,3 +400,8 @@ export const deleteRatingApi = async (id) => {
   const res = await api.delete(`/rating/delete/${id}`);
   return res.data;
 };
+// authService.js में Section 1 के नीचे इसे जोड़ें
+export const getAllUsersApi = async () => {
+  const response = await api.get("/auth/get-all"); // सुनिश्चित करें कि आपका Backend endpoint यही है
+  return response.data;
+};

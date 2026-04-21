@@ -29,7 +29,8 @@ export const useCrud = (apiMethods) => {
         res?.Plan ||
         res?.comments ||
         res?.listings ||
-        res?.contact||
+        res?.contact ||
+        res?.bookings ||
         res?.footer ||
         res?.data;
 

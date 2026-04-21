@@ -16,12 +16,14 @@ const Sidebar = ({ isOpen, onClose }) => {
       path: "/admin/blog-categories",
       icon: "bi-collection",
     },
-
+    { name: "Booknow", path: "/admin/book-now", icon: "bi-currency-dollar" },
+    { name: "Rating", path: "/admin/rating", icon: "bi-currency-dollar" },
     { name: "Pricing", path: "/admin/pricing", icon: "bi-currency-dollar" },
+
     { name: "Comments", path: "/admin/comments", icon: "bi-chat-dots" },
     { name: "ContactUs", path: "/admin/contact-us", icon: "bi-telephone" },
 
-    {  
+    {
       name: "Legal Docs",
       path: "/admin/legal-docs",
       icon: "bi-file-earmark-lock",
@@ -43,7 +45,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         <div className="sidebar-logo d-flex justify-content-between align-items-center flex-shrink-0">
           <div className="fw-bold fs-3 text-white">
             My<span style={{ color: "var(--gold)" }}>Uma</span>
-          </div>
+          </div> 
           <button
             className="btn text-white d-md-none border-0"
             onClick={onClose}>

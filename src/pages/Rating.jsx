@@ -9,7 +9,7 @@ import {
   addRatingApi,
   updateRatingApi,
   deleteRatingApi,
-  getAllListingsApi, // For Item Selection
+  getAllListingsApi,
 } from "../services/authService";
 
 const RATING_METHODS = {
@@ -22,7 +22,10 @@ const RATING_METHODS = {
 const Rating = () => {
   const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
     useCrud(RATING_METHODS);
-  const pagination = usePagination(data, 10);
+
+  // Extracting the rating array from API response
+  const ratingList = Array.isArray(data) ? data : data?.data || [];
+  const pagination = usePagination(ratingList, 10);
 
   const [listings, setListings] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -43,10 +46,22 @@ const Rating = () => {
   const fetchListings = async () => {
     try {
       const res = await getAllListingsApi();
-      setListings(res?.data || res?.listings || []);
+      // Ensure we store the array of items/properties
+      setListings(res?.data || res?.listings || res || []);
     } catch (err) {
       console.error("Failed to fetch listings");
     }
+  };
+
+  /**
+   * LOOKUP LOGIC
+   * This function finds the 'title' from the listings array
+   * using the itemId provided in the rating.
+   */
+  const getItemName = (id) => {
+    if (!id) return "Unknown Item";
+    const found = listings.find((item) => item._id === id);
+    return found ? found.title : id; // Returns title if found, otherwise the ID
   };
 
   const handleSave = async (e) => {
@@ -57,12 +72,15 @@ const Rating = () => {
     if (success) setShowModal(false);
   };
 
+  const formatDate = (date) => (date ? new Date(date).toLocaleString() : "---");
+
   const getPreviewText = (html) => {
     if (!html) return "";
     const doc = new DOMParser().parseFromString(html, "text/html");
     const plainText = doc.body.textContent || "";
-    const words = plainText.trim().split(/\s+/);
-    return words.length > 5 ? words.slice(0, 5).join(" ") + "..." : plainText;
+    return plainText.length > 25
+      ? plainText.substring(0, 25) + "..."
+      : plainText;
   };
 
   const openModal = (item = null) => {
@@ -86,16 +104,14 @@ const Rating = () => {
       <div className="mb-4">
         <h4 className="fw-bold text-navy">Rating Management</h4>
         <p className="text-muted small">
-          Manage and moderate user reviews and ratings
+          Managing all review data and item associations
         </p>
       </div>
 
-      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-3 gap-2">
-        <h5 className="fw-bold text-navy m-0">All Ratings</h5>
-        <CustomButton
-          onClick={() => openModal()}
-          className="w-100 w-sm-auto shadow-sm">
-          <i className="bi bi-star me-2"></i> Add Review
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="fw-bold text-navy m-0">Review Logs</h5>
+        <CustomButton onClick={() => openModal()} className="shadow-sm">
+          <i className="bi bi-plus-lg me-1"></i> Add Review
         </CustomButton>
       </div>
 
@@ -105,53 +121,70 @@ const Rating = () => {
             <thead style={{ background: "var(--navy)", color: "white" }}>
               <tr className="small text-uppercase">
                 <th className="px-4 py-3">#</th>
-                <th>User</th>
-                <th>Item / Property</th>
+                <th>ID</th>
+                <th>User Name / ID</th>
+                <th>Item / Property Name</th>
                 <th>Rating</th>
-                <th>Comment Preview</th>
+                <th>Comment</th>
+             
                 <th className="text-end px-4">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {loading && data.length === 0 ? (
+              {loading && ratingList.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-5">
+                  <td colSpan="10" className="text-center py-5">
                     <div className="spinner-border text-gold"></div>
                   </td>
                 </tr>
               ) : (
                 pagination.paginatedData.map((item, i) => (
-                  <tr key={item._id}>
+                  <tr key={item._id} className="small">
                     <td className="px-4 text-muted">
                       {(pagination.currentPage - 1) * 10 + (i + 1)}
                     </td>
-                    <td className="fw-bold text-navy">
-                      {item.userId?.fullName || "User"}
+                    <td
+                      className="text-muted font-monospace"
+                      style={{ fontSize: "11px" }}>
+                      {item._id}
                     </td>
                     <td>
-                      <span className="badge bg-light text-dark border">
-                        {item.itemId?.title || "N/A"}
-                      </span>
+                      {/* If the backend populates name, show it. Otherwise show ID */}
+                      <div className="fw-bold text-navy">
+                        {item.userId?.fullName || "User"}
+                      </div>
+                      <div className="text-muted" style={{ fontSize: "10px" }}>
+                        {item.userId?._id || item.userId}
+                      </div>
+                    </td>
+                    <td>
+                      <div className="badge bg-info-subtle text-info border border-info-subtle px-2">
+                        {getItemName(item.itemId)}
+                      </div>
                     </td>
                     <td>
                       <span className="fw-bold text-gold">
                         {item.rating} <i className="bi bi-star-fill small"></i>
                       </span>
                     </td>
-                    <td className="small text-muted">
+                    <td className="text-muted">
                       {getPreviewText(item.comment)}
                     </td>
+            
+                 
                     <td className="text-end px-4">
-                      <button
-                        className="btn btn-sm btn-light border-0 me-2 shadow-sm"
-                        onClick={() => openModal(item)}>
-                        <i className="bi bi-pencil-square text-info"></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-light border-0 shadow-sm"
-                        onClick={() => deleteItem(item._id)}>
-                        <i className="bi bi-trash3 text-danger"></i>
-                      </button>
+                      <div className="d-flex justify-content-end gap-2">
+                        <button
+                          className="btn btn-sm btn-light border"
+                          onClick={() => openModal(item)}>
+                          <i className="bi bi-pencil-square text-primary"></i>
+                        </button>
+                        <button
+                          className="btn btn-sm btn-light border"
+                          onClick={() => deleteItem(item._id)}>
+                          <i className="bi bi-trash3 text-danger"></i>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -160,6 +193,7 @@ const Rating = () => {
           </table>
         </div>
       </div>
+
       <div className="mt-3">
         <Pagination {...pagination} />
       </div>
@@ -167,52 +201,48 @@ const Rating = () => {
       {showModal && (
         <div
           className="modal d-block"
-          style={{
-            background: "rgba(0,0,0,0.5)",
-            backdropFilter: "blur(4px)",
-            zIndex: 9999,
-          }}>
+          style={{ background: "rgba(0,0,0,0.5)", zIndex: 9999 }}>
           <div className="modal-dialog modal-lg modal-dialog-centered px-3">
-            <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
-              <div className="modal-header border-0 p-4 pb-0">
+            <div className="modal-content border-0 rounded-4 shadow-lg">
+              <div className="modal-header border-0 p-4">
                 <h5 className="fw-bold text-navy m-0">
-                  {editId ? "Update Review" : "New Rating Entry"}
+                  {editId ? "Update Review" : "New Rating"}
                 </h5>
                 <button
                   className="btn-close shadow-none"
                   onClick={() => setShowModal(false)}></button>
               </div>
               <form onSubmit={handleSave}>
-                <div className="modal-body p-4">
+                <div className="modal-body p-4 pt-0">
                   <div className="row g-3">
                     <div className="col-md-6">
-                      <label className="small fw-bold text-muted mb-2 text-uppercase">
-                        Select Item
+                      <label className="small fw-bold text-muted mb-2">
+                        SELECT ITEM
                       </label>
                       <select
-                        className="form-select border-2 shadow-none rounded-3"
+                        className="form-select border-2"
                         value={formData.itemId}
                         onChange={(e) =>
                           setFormData({ ...formData, itemId: e.target.value })
                         }
                         required>
                         <option value="">-- Choose Item --</option>
-                        {listings.map((item) => (
-                          <option key={item._id} value={item._id}>
-                            {item.title}
+                        {listings.map((l) => (
+                          <option key={l._id} value={l._id}>
+                            {l.title}
                           </option>
                         ))}
                       </select>
                     </div>
                     <div className="col-md-3">
-                      <label className="small fw-bold text-muted mb-2 text-uppercase">
-                        Rating (1-5)
+                      <label className="small fw-bold text-muted mb-2">
+                        RATING (1-5)
                       </label>
                       <input
                         type="number"
+                        className="form-control border-2"
                         min="1"
                         max="5"
-                        className="form-control border-2 shadow-none rounded-3"
                         value={formData.rating}
                         onChange={(e) =>
                           setFormData({ ...formData, rating: e.target.value })
@@ -221,12 +251,12 @@ const Rating = () => {
                       />
                     </div>
                     <div className="col-md-3">
-                      <label className="small fw-bold text-muted mb-2 text-uppercase">
-                        User ID
+                      <label className="small fw-bold text-muted mb-2">
+                        USER ID
                       </label>
                       <input
                         type="text"
-                        className="form-control border-2 shadow-none rounded-3"
+                        className="form-control border-2"
                         value={formData.userId}
                         onChange={(e) =>
                           setFormData({ ...formData, userId: e.target.value })
@@ -235,8 +265,8 @@ const Rating = () => {
                       />
                     </div>
                     <div className="col-12">
-                      <label className="small fw-bold text-muted mb-2 text-uppercase">
-                        Review Comment
+                      <label className="small fw-bold text-muted mb-2">
+                        COMMENT
                       </label>
                       <TextEditor
                         value={formData.comment}
@@ -247,25 +277,15 @@ const Rating = () => {
                     </div>
                   </div>
                 </div>
-                <div className="modal-footer border-0 p-4 pt-0 mt-3">
-                  <div className="row w-100 g-2 m-0">
-                    <div className="col-6">
-                      <CustomButton
-                        variant="cancel"
-                        className="w-100"
-                        onClick={() => setShowModal(false)}>
-                        Cancel
-                      </CustomButton>
-                    </div>
-                    <div className="col-6">
-                      <CustomButton
-                        type="submit"
-                        loading={loading}
-                        className="w-100">
-                        {editId ? "Update" : "Save"}
-                      </CustomButton>
-                    </div>
-                  </div>
+                <div className="modal-footer border-0 p-4">
+                  <CustomButton
+                    variant="cancel"
+                    onClick={() => setShowModal(false)}>
+                    Cancel
+                  </CustomButton>
+                  <CustomButton type="submit" loading={loading}>
+                    {editId ? "Update" : "Save"}
+                  </CustomButton>
                 </div>
               </form>
             </div>

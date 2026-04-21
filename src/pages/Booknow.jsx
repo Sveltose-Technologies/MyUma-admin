@@ -8,7 +8,8 @@ import {
   addBooknowApi,
   updateBooknowApi,
   deleteBooknowApi,
-  getAllListingsApi, // Assuming this exists for item selection
+  getAllListingsApi,
+  // getAllUsersApi, // Add this if you have a user list API
 } from "../services/authService";
 
 const BOOKNOW_METHODS = {
@@ -19,17 +20,17 @@ const BOOKNOW_METHODS = {
 };
 
 const Booknow = () => {
-  const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
-    useCrud(BOOKNOW_METHODS);
+  const { data, loading, fetchAll, addItem, updateItem, deleteItem } = useCrud(BOOKNOW_METHODS);
   const pagination = usePagination(data, 10);
 
   const [listings, setListings] = useState([]);
+  const [users, setUsers] = useState([]); // State to store user names for lookup
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
 
   const [formData, setFormData] = useState({
-    userId: "", // Typically a User ID string
-    itemId: "", // Typically a Listing/Item ID string
+    userId: "",
+    itemId: "",
   });
 
   useEffect(() => {
@@ -40,10 +41,30 @@ const Booknow = () => {
   const fetchSelectionData = async () => {
     try {
       const listingRes = await getAllListingsApi();
-      setListings(listingRes?.data || listingRes?.listings || []);
+      // Console shows data is in .listings array
+      setListings(listingRes?.listings || listingRes?.data || []);
+
+      // If you have a user API, uncomment this to resolve User IDs to Names
+      // const userRes = await getAllUsersApi();
+      // setUsers(userRes?.users || userRes?.data || []);
     } catch (err) {
-      console.error("Failed to fetch listings for selection");
+      console.error("Failed to fetch selection data");
     }
+  };
+
+  // HELPER: Find Listing Name (Address) by ID
+  const getItemName = (id) => {
+    if (!id) return "N/A";
+    const found = listings.find((l) => l._id === id);
+    // According to your console, properties have an 'address' field
+    return found ? found.address : id; 
+  };
+
+  // HELPER: Find User Name by ID (Requires fetching users list)
+  const getUserName = (id) => {
+    if (!id) return "N/A";
+    const found = users.find((u) => u._id === id);
+    return found ? (found.fullName || found.email) : id;
   };
 
   const handleSave = async (e) => {
@@ -74,7 +95,7 @@ const Booknow = () => {
       <div className="mb-4">
         <h4 className="fw-bold text-navy">Booking Management</h4>
         <p className="text-muted small">
-          View and manage customer booking requests
+          View and manage customer property bookings
         </p>
       </div>
 
@@ -82,7 +103,7 @@ const Booknow = () => {
         <h5 className="fw-bold text-navy m-0">All Bookings</h5>
         <CustomButton
           onClick={() => openModal()}
-          className="w-100 w-sm-auto shadow-sm">
+          className="w-20 w-sm-auto shadow-sm">
           <i className="bi bi-bookmark-plus me-2"></i> Create Booking
         </CustomButton>
       </div>
@@ -114,11 +135,17 @@ const Booknow = () => {
                       {(pagination.currentPage - 1) * 10 + (i + 1)}
                     </td>
                     <td className="fw-bold text-navy">
-                      {item.userId?.fullName || item.userId?.email || "N/A"}
+                      {/* Check if object (populated) or string (lookup) */}
+                      {typeof item.userId === 'object' 
+                        ? (item.userId?.fullName || item.userId?.email) 
+                        : getUserName(item.userId)}
                     </td>
                     <td>
                       <span className="badge bg-light text-dark border">
-                        {item.itemId?.title || "Unknown Item"}
+                         {/* Check if object (populated) or string (lookup) */}
+                        {typeof item.itemId === 'object' 
+                          ? (item.itemId?.address || item.itemId?.title) 
+                          : getItemName(item.itemId)}
                       </span>
                     </td>
                     <td className="small text-muted">
@@ -183,7 +210,7 @@ const Booknow = () => {
                       <option value="">-- Choose Listing --</option>
                       {listings.map((item) => (
                         <option key={item._id} value={item._id}>
-                          {item.title}
+                          {item.address || item.title}
                         </option>
                       ))}
                     </select>

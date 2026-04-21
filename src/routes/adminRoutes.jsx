@@ -15,6 +15,8 @@ const Pricing = lazy(() => import("../pages/Pricing"));
 const Comments = lazy(() => import("../pages/Comments"));
 const FooterText = lazy(() => import("../pages/FooterText"));
 const ContactUs = lazy(()=>import("../pages/ContactUs"))
+const Rating = lazy(() => import("../pages/Rating"));
+const Booknow = lazy(() => import("../pages/Booknow"));
 export const adminRoutes = [
   {
     path: "",
@@ -55,6 +57,16 @@ export const adminRoutes = [
     path: "about-us",
     element: <AboutUs />,
     title: "AboutUS",
+  },
+  {
+    path: "rating",
+    element: <Rating />,
+    title: "Rating",
+  },
+  {
+    path: "book-now",
+    element: <Booknow />,
+    title: "Booknow",
   },
   {
     path: "pricing",
