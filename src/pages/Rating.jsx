@@ -23,7 +23,7 @@ const Rating = () => {
   const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
     useCrud(RATING_METHODS);
 
-  // Extracting the rating array from API response
+  // Ratings are inside res.data based on your JSON
   const ratingList = Array.isArray(data) ? data : data?.data || [];
   const pagination = usePagination(ratingList, 10);
 
@@ -43,25 +43,42 @@ const Rating = () => {
     fetchListings();
   }, [fetchAll]);
 
+  // Fetch all service listings for the dropdown and lookup
   const fetchListings = async () => {
     try {
       const res = await getAllListingsApi();
-      // Ensure we store the array of items/properties
-      setListings(res?.data || res?.listings || res || []);
+      // Based on your console: res.listings contains the array
+      setListings(res?.listings || []);
     } catch (err) {
-      console.error("Failed to fetch listings");
+      console.error("Failed to fetch listings", err);
     }
   };
 
   /**
    * LOOKUP LOGIC
-   * This function finds the 'title' from the listings array
-   * using the itemId provided in the rating.
+   * Finds the title of the service based on the itemId
    */
   const getItemName = (id) => {
-    if (!id) return "Unknown Item";
-    const found = listings.find((item) => item._id === id);
-    return found ? found.title : id; // Returns title if found, otherwise the ID
+    if (!id) return "---";
+    const searchId = typeof id === "object" ? id._id : id;
+    const found = listings.find((item) => item._id === searchId);
+    return found ? found.title : "Unknown Service";
+  };
+
+  // Render Stars UI
+  const renderStars = (rating) => {
+    return [...Array(5)].map((_, i) => (
+      <i
+        key={i}
+        className={`bi bi-star-fill ${i < rating ? "text-warning" : "text-light"}`}
+        style={{ fontSize: "14px" }}></i>
+    ));
+  };
+
+  const stripHtml = (html) => {
+    if (!html) return "No comment";
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    return doc.body.textContent || "";
   };
 
   const handleSave = async (e) => {
@@ -70,17 +87,6 @@ const Rating = () => {
       ? await updateItem(editId, formData)
       : await addItem(formData);
     if (success) setShowModal(false);
-  };
-
-  const formatDate = (date) => (date ? new Date(date).toLocaleString() : "---");
-
-  const getPreviewText = (html) => {
-    if (!html) return "";
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    const plainText = doc.body.textContent || "";
-    return plainText.length > 25
-      ? plainText.substring(0, 25) + "..."
-      : plainText;
   };
 
   const openModal = (item = null) => {
@@ -100,89 +106,88 @@ const Rating = () => {
   };
 
   return (
-    <div className="container-fluid py-3 py-md-4">
-      <div className="mb-4">
-        <h4 className="fw-bold text-navy">Rating Management</h4>
-        <p className="text-muted small">
-          Managing all review data and item associations
-        </p>
+    <div className="container-fluid py-4">
+      {/* Header Section */}
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 className="fw-800 text-navy mb-1 ls-1">REVIEW MANAGEMENT</h4>
+          <p className="text-muted small">
+            Manage and moderate customer feedback
+          </p>
+        </div>
+        <button className="uma-btn-navy uma-btn" onClick={() => openModal()}>
+          <i className="bi bi-plus-lg me-2"></i> ADD REVIEW
+        </button>
       </div>
 
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5 className="fw-bold text-navy m-0">Review Logs</h5>
-        <CustomButton onClick={() => openModal()} className="shadow-sm">
-          <i className="bi bi-plus-lg me-1"></i> Add Review
-        </CustomButton>
-      </div>
-
+      {/* Table Card */}
       <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0 text-nowrap">
-            <thead style={{ background: "var(--navy)", color: "white" }}>
-              <tr className="small text-uppercase">
+          <table className="table table-hover align-middle mb-0">
+            <thead className="bg-navy text-white">
+              <tr className="small text-uppercase ls-1">
                 <th className="px-4 py-3">#</th>
-                <th>ID</th>
-                <th>User Name / ID</th>
-                <th>Item / Property Name</th>
-                <th>Rating</th>
+                <th>User</th>
+                <th>Service Name</th>
                 <th>Comment</th>
-             
+                <th>Rating</th>
+                <th>Date</th>
                 <th className="text-end px-4">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading && ratingList.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="text-center py-5">
-                    <div className="spinner-border text-gold"></div>
+                  <td colSpan="7" className="text-center py-5">
+                    <div className="spinner-border text-tan"></div>
                   </td>
                 </tr>
               ) : (
                 pagination.paginatedData.map((item, i) => (
-                  <tr key={item._id} className="small">
-                    <td className="px-4 text-muted">
+                  <tr key={item._id} className="transition-hover">
+                    <td className="px-4 text-muted small">
                       {(pagination.currentPage - 1) * 10 + (i + 1)}
                     </td>
-                    <td
-                      className="text-muted font-monospace"
-                      style={{ fontSize: "11px" }}>
-                      {item._id}
-                    </td>
                     <td>
-                      {/* If the backend populates name, show it. Otherwise show ID */}
                       <div className="fw-bold text-navy">
-                        {item.userId?.fullName || "User"}
+                        {item.userId?.fullName || "Customer"}
                       </div>
-                      <div className="text-muted" style={{ fontSize: "10px" }}>
-                        {item.userId?._id || item.userId}
+                      <div
+                        className="text-muted small"
+                        style={{ fontSize: "10px" }}>
+                        ID:{" "}
+                        {typeof item.userId === "string"
+                          ? item.userId
+                          : item.userId?._id}
                       </div>
                     </td>
                     <td>
-                      <div className="badge bg-info-subtle text-info border border-info-subtle px-2">
+                      <span className="badge bg-tan text-navy border-0 px-2 py-1">
                         {getItemName(item.itemId)}
-                      </div>
-                    </td>
-                    <td>
-                      <span className="fw-bold text-gold">
-                        {item.rating} <i className="bi bi-star-fill small"></i>
                       </span>
                     </td>
-                    <td className="text-muted">
-                      {getPreviewText(item.comment)}
+                    <td
+                      className="text-muted small"
+                      style={{ maxWidth: "200px" }}>
+                      <div className="text-truncate">
+                        {stripHtml(item.comment)}
+                      </div>
                     </td>
-            
-                 
+                    <td>{renderStars(item.rating)}</td>
+                    <td className="text-muted small">
+                      {item.createdAt ? item.createdAt.split("T")[0] : "---"}
+                    </td>
                     <td className="text-end px-4">
-                      <div className="d-flex justify-content-end gap-2">
+                      <div className="btn-group border rounded shadow-sm bg-white">
                         <button
-                          className="btn btn-sm btn-light border"
+                          className="btn btn-sm btn-white border-end"
                           onClick={() => openModal(item)}>
                           <i className="bi bi-pencil-square text-primary"></i>
                         </button>
                         <button
-                          className="btn btn-sm btn-light border"
+                          className="btn btn-sm btn-white text-danger"
                           onClick={() => deleteItem(item._id)}>
-                          <i className="bi bi-trash3 text-danger"></i>
+                          <i className="bi bi-trash3"></i>
                         </button>
                       </div>
                     </td>
@@ -194,39 +199,43 @@ const Rating = () => {
         </div>
       </div>
 
-      <div className="mt-3">
+      {/* Pagination */}
+      <div className="mt-4">
         <Pagination {...pagination} />
       </div>
 
+      {/* Add/Edit Modal */}
       {showModal && (
         <div
           className="modal d-block"
-          style={{ background: "rgba(0,0,0,0.5)", zIndex: 9999 }}>
+          style={{ background: "rgba(0,0,0,0.6)", zIndex: 1050 }}>
           <div className="modal-dialog modal-lg modal-dialog-centered px-3">
-            <div className="modal-content border-0 rounded-4 shadow-lg">
-              <div className="modal-header border-0 p-4">
-                <h5 className="fw-bold text-navy m-0">
-                  {editId ? "Update Review" : "New Rating"}
+            <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+              <div className="modal-header bg-navy text-white border-0 p-4">
+                <h5 className="fw-800 m-0 ls-1">
+                  {editId ? "UPDATE REVIEW" : "WRITE NEW REVIEW"}
                 </h5>
                 <button
-                  className="btn-close shadow-none"
+                  type="button"
+                  className="btn-close btn-close-white shadow-none"
                   onClick={() => setShowModal(false)}></button>
               </div>
+
               <form onSubmit={handleSave}>
-                <div className="modal-body p-4 pt-0">
+                <div className="modal-body p-4 bg-light">
                   <div className="row g-3">
-                    <div className="col-md-6">
-                      <label className="small fw-bold text-muted mb-2">
-                        SELECT ITEM
+                    <div className="col-md-12">
+                      <label className="small fw-800 text-navy mb-2 ls-1">
+                        SELECT SERVICE
                       </label>
                       <select
-                        className="form-select border-2"
+                        className="form-select border-gold"
                         value={formData.itemId}
                         onChange={(e) =>
                           setFormData({ ...formData, itemId: e.target.value })
                         }
                         required>
-                        <option value="">-- Choose Item --</option>
+                        <option value="">-- Choose Listing --</option>
                         {listings.map((l) => (
                           <option key={l._id} value={l._id}>
                             {l.title}
@@ -234,15 +243,17 @@ const Rating = () => {
                         ))}
                       </select>
                     </div>
-                    <div className="col-md-3">
-                      <label className="small fw-bold text-muted mb-2">
-                        RATING (1-5)
+
+                    <div className="col-md-6">
+                      <label className="small fw-800 text-navy mb-2 ls-1">
+                        SCORE (1-5)
                       </label>
                       <input
                         type="number"
-                        className="form-control border-2"
+                        className="form-control border-gold"
                         min="1"
                         max="5"
+                        placeholder="e.g. 5"
                         value={formData.rating}
                         onChange={(e) =>
                           setFormData({ ...formData, rating: e.target.value })
@@ -250,13 +261,15 @@ const Rating = () => {
                         required
                       />
                     </div>
-                    <div className="col-md-3">
-                      <label className="small fw-bold text-muted mb-2">
-                        USER ID
+
+                    <div className="col-md-6">
+                      <label className="small fw-800 text-navy mb-2 ls-1">
+                        USER REFERENCE ID
                       </label>
                       <input
                         type="text"
-                        className="form-control border-2"
+                        className="form-control border-gold"
+                        placeholder="Paste User ID"
                         value={formData.userId}
                         onChange={(e) =>
                           setFormData({ ...formData, userId: e.target.value })
@@ -264,28 +277,33 @@ const Rating = () => {
                         required
                       />
                     </div>
+
                     <div className="col-12">
-                      <label className="small fw-bold text-muted mb-2">
-                        COMMENT
+                      <label className="small fw-800 text-navy mb-2 ls-1">
+                        REVIEW DETAILS
                       </label>
-                      <TextEditor
-                        value={formData.comment}
-                        onChange={(val) =>
-                          setFormData({ ...formData, comment: val })
-                        }
-                      />
+                      <div className="bg-white rounded">
+                        <TextEditor
+                          value={formData.comment}
+                          onChange={(val) =>
+                            setFormData({ ...formData, comment: val })
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="modal-footer border-0 p-4">
-                  <CustomButton
-                    variant="cancel"
+
+                <div className="modal-footer bg-white border-0 p-4 pt-0">
+                  <button
+                    type="button"
+                    className="btn btn-light px-4 fw-bold"
                     onClick={() => setShowModal(false)}>
-                    Cancel
-                  </CustomButton>
-                  <CustomButton type="submit" loading={loading}>
-                    {editId ? "Update" : "Save"}
-                  </CustomButton>
+                    CANCEL
+                  </button>
+                  <button type="submit" className="uma-btn-navy uma-btn px-5">
+                    {editId ? "UPDATE REVIEW" : "PUBLISH REVIEW"}
+                  </button>
                 </div>
               </form>
             </div>

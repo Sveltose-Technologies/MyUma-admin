@@ -9,7 +9,6 @@ import {
   updateBooknowApi,
   deleteBooknowApi,
   getAllListingsApi,
-  // getAllUsersApi, // Add this if you have a user list API
 } from "../services/authService";
 
 const BOOKNOW_METHODS = {
@@ -44,9 +43,6 @@ const Booknow = () => {
       // Console shows data is in .listings array
       setListings(listingRes?.listings || listingRes?.data || []);
 
-      // If you have a user API, uncomment this to resolve User IDs to Names
-      // const userRes = await getAllUsersApi();
-      // setUsers(userRes?.users || userRes?.data || []);
     } catch (err) {
       console.error("Failed to fetch selection data");
     }

@@ -1,3 +1,4 @@
+//hook/useFetch
 import { useState, useCallback } from "react";
 import { toast } from "react-toastify";
 
@@ -9,7 +10,7 @@ export const useCrud = (apiMethods) => {
   // 1. GET ALL DATA (Fetch)
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    try {
+    try { 
       const res = await apiMethods.getAll();
 
      

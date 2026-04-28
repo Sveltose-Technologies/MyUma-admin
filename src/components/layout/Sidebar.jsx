@@ -16,8 +16,8 @@ const Sidebar = ({ isOpen, onClose }) => {
       path: "/admin/blog-categories",
       icon: "bi-collection",
     },
-    { name: "Booknow", path: "/admin/book-now", icon: "bi-currency-dollar" },
-    { name: "Rating", path: "/admin/rating", icon: "bi-currency-dollar" },
+    { name: "Book Now", path: "/admin/book-now", icon: "bi-calendar-check" },
+    { name: "Rating", path: "/admin/rating", icon: "bi-star-fill" },
     { name: "Pricing", path: "/admin/pricing", icon: "bi-currency-dollar" },
 
     { name: "Comments", path: "/admin/comments", icon: "bi-chat-dots" },
