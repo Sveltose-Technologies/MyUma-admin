@@ -10,15 +10,15 @@ export const useCrud = (apiMethods) => {
   // 1. GET ALL DATA (Fetch)
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    try { 
+    try {
       const res = await apiMethods.getAll();
 
-     
       console.log("Full API Response in Hook:", res);
 
-     
       const rawData =
         res?.categories ||
+        res?.subcategories ||
+        res?.testimonials || // 👈 Added this for Testimonials
         res?.homeBanner ||
         res?.logo ||
         res?.logos ||
@@ -32,14 +32,15 @@ export const useCrud = (apiMethods) => {
         res?.listings ||
         res?.contact ||
         res?.bookings ||
+        res?.reviews ||
         res?.footer ||
-        res?.data;
+        res?.data; // res?.data will catch anything else
 
       let result = [];
       if (Array.isArray(rawData)) {
         result = rawData;
       } else if (rawData && typeof rawData === "object") {
-        result = [rawData]; 
+        result = [rawData];
       } else if (Array.isArray(res)) {
         result = res;
       }

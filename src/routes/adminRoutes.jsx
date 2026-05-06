@@ -17,6 +17,9 @@ const FooterText = lazy(() => import("../pages/FooterText"));
 const ContactUs = lazy(()=>import("../pages/ContactUs"))
 const Rating = lazy(() => import("../pages/Rating"));
 const Booknow = lazy(() => import("../pages/Booknow"));
+const Testimonials = lazy(() => import("../pages/Testimonials")); 
+const SubCategories = lazy(() => import("../pages/SubCategories")); 
+const Reviews = lazy(() => import("../pages/Reviews")); 
 export const adminRoutes = [
   {
     path: "",
@@ -27,6 +30,16 @@ export const adminRoutes = [
     path: "categories",
     element: <Categories />,
     title: "Categories",
+  },
+  {
+    path: "sub-categories", // Path for Sub-Category
+    element: <SubCategories />,
+    title: "Sub-Categories",
+  },
+  {
+    path: "reviews", // Path for Review Management
+    element: <Reviews />,
+    title: "Reviews",
   },
   {
     path: "home",
@@ -87,6 +100,11 @@ export const adminRoutes = [
     path: "contact-us",
     element: <ContactUs />,
     title: "ContactUs",
+  },
+  {
+    path: "testimonials", // URL: /admin/testimonials
+    element: <Testimonials />,
+    title: "Testimonials",
   },
   {
     path: "footer-text",

@@ -404,3 +404,72 @@ export const getAllUsersApi = async () => {
   const response = await api.get("/auth/get-all"); 
   return response.data;
 };
+// --- Update this section at the bottom of your authService.js ---
+
+// 11. TESTIMONIAL METHODS
+export const testimonialMethods = {
+  getAll: async () => {
+    const res = await api.get("/testimonial/get-all"); // Changed API to api
+    return res.data;
+  },
+  add: async (formData) => {
+    return await api.post("/testimonial/add", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  update: async (id, formData) => {
+    return await api.put(`/testimonial/update/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  delete: async (id) => {
+    return await api.delete(`/testimonial/delete/${id}`);
+  }
+};
+
+// 12. SUB-CATEGORY APIS
+export const getAllSubCategoriesApi = async () => {
+  const response = await api.get("/subcategory/get-all"); // Changed API to api
+  return response.data;
+};
+
+export const addSubCategoryApi = async (data) => {
+  const response = await api.post("/subcategory/add", data);
+  return response.data;
+};
+
+export const updateSubCategoryApi = async (id, data) => {
+  const response = await api.put(`/subcategory/update/${id}`, data);
+  return response.data;
+};
+
+export const deleteSubCategoryApi = async (id) => {
+  const response = await api.delete(`/subcategory/delete/${id}`);
+  return response.data;
+};
+
+// --- Review APIs ---
+export const reviewMethods = {
+  getAll: async () => {
+    const res = await api.get("/review/get-all");
+    return res.data;
+  },
+  add: async (data) => {
+    const res = await api.post("/review/add", data);
+    return res.data;
+  },
+  update: async (id, data) => {
+    const res = await api.put(`/review/update/${id}`, data);
+    return res.data;
+  },
+  delete: async (id) => {
+    const res = await api.delete(`/review/delete/${id}`);
+    return res.data;
+  }
+};
+
+// You might also need these to fill the dropdowns in the modal
+export const getAllItemsApi = async () => {
+  const res = await api.get("/newListing/get-all");
+  return res.data;
+};
