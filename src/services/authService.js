@@ -5,6 +5,9 @@ import api from "./api";
 // ==========================================
 export const loginApi = async (credentials) => {
   const response = await api.post("/auth/login", credentials);
+  console.log(" API CALL: loginApi | Credentials:", credentials);
+  console.log(" SUCCESS: loginApi | Response:", response.data);
+
   return response.data;
 };
 
