@@ -9,6 +9,11 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: "About Us", path: "/admin/about-us", icon: "bi-info-circle" },
 
     { name: "Categories", path: "/admin/categories", icon: "bi-tags" },
+    {
+      name: "Sub-Categories",
+      path: "/admin/sub-categories",
+      icon: "bi-list-nested", // Modern nested list icon
+    },
     { name: "New Listings", path: "/admin/listings", icon: "bi-building-add" },
     { name: "Blogs", path: "/admin/blogs", icon: "bi-newspaper" },
     {
@@ -18,8 +23,14 @@ const Sidebar = ({ isOpen, onClose }) => {
     },
     { name: "Book Now", path: "/admin/book-now", icon: "bi-calendar-check" },
     { name: "Rating", path: "/admin/rating", icon: "bi-star-fill" },
-    { name: "Pricing", path: "/admin/pricing", icon: "bi-currency-dollar" },
+    { name: "Reviews", path: "/admin/reviews", icon: "bi-star-half" }, // Add this line
 
+    { name: "Pricing", path: "/admin/pricing", icon: "bi-currency-dollar" },
+    {
+      name: "Testimonials",
+      path: "/admin/testimonials",
+      icon: "bi-chat-quote-fill",
+    },
     { name: "Comments", path: "/admin/comments", icon: "bi-chat-dots" },
     { name: "ContactUs", path: "/admin/contact-us", icon: "bi-telephone" },
 
