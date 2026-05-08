@@ -430,6 +430,8 @@ export const testimonialMethods = {
 // 12. SUB-CATEGORY APIS
 export const getAllSubCategoriesApi = async () => {
   const response = await api.get("/subcategory/get-all"); // Changed API to api
+  console.log("subcategory",response);
+  
   return response.data;
 };
 
