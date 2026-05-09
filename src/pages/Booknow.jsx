@@ -9,6 +9,7 @@ import {
   updateBooknowApi,
   deleteBooknowApi,
   getAllListingsApi,
+  getAllUsersApi, // Assuming this service exists to fetch user names
 } from "../services/authService";
 
 const BOOKNOW_METHODS = {
@@ -19,11 +20,15 @@ const BOOKNOW_METHODS = {
 };
 
 const Booknow = () => {
-  const { data, loading, fetchAll, addItem, updateItem, deleteItem } = useCrud(BOOKNOW_METHODS);
-  const pagination = usePagination(data, 10);
+  const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
+    useCrud(BOOKNOW_METHODS);
+
+  // Extract bookings array from the response object { bookings: [...] }
+  const bookingList = data?.bookings || (Array.isArray(data) ? data : []);
+  const pagination = usePagination(bookingList, 10);
 
   const [listings, setListings] = useState([]);
-  const [users, setUsers] = useState([]); // State to store user names for lookup
+  const [users, setUsers] = useState([]); // State to store user names
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
 
@@ -39,28 +44,27 @@ const Booknow = () => {
 
   const fetchSelectionData = async () => {
     try {
-      const listingRes = await getAllListingsApi();
-      // Console shows data is in .listings array
-      setListings(listingRes?.listings || listingRes?.data || []);
-
+      const [listingRes, userRes] = await Promise.all([
+        getAllListingsApi(),
+        getAllUsersApi(),
+      ]);
+      setListings(listingRes?.data || listingRes?.listings || []);
+      setUsers(userRes?.data || userRes?.users || []);
     } catch (err) {
       console.error("Failed to fetch selection data");
     }
   };
 
-  // HELPER: Find Listing Name (Address) by ID
+  // Helper: Find Item Name from ID
   const getItemName = (id) => {
-    if (!id) return "N/A";
     const found = listings.find((l) => l._id === id);
-    // According to your console, properties have an 'address' field
-    return found ? found.address : id; 
+    return found ? found.title : id;
   };
 
-  // HELPER: Find User Name by ID (Requires fetching users list)
+  // Helper: Find User Name from ID
   const getUserName = (id) => {
-    if (!id) return "N/A";
     const found = users.find((u) => u._id === id);
-    return found ? (found.fullName || found.email) : id;
+    return found ? found.fullName || found.name : id;
   };
 
   const handleSave = async (e) => {
@@ -70,6 +74,8 @@ const Booknow = () => {
       : await addItem(formData);
     if (success) setShowModal(false);
   };
+
+  const formatDate = (date) => (date ? new Date(date).toLocaleString() : "N/A");
 
   const openModal = (item = null) => {
     if (item) {
@@ -87,65 +93,75 @@ const Booknow = () => {
 
   return (
     <div className="container-fluid py-3 py-md-4">
-      {/* Header */}
       <div className="mb-4">
         <h4 className="fw-bold text-navy">Booking Management</h4>
         <p className="text-muted small">
-          View and manage customer property bookings
+          View all booking records with user and item details
         </p>
       </div>
 
       <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-3 gap-2">
-        <h5 className="fw-bold text-navy m-0">All Bookings</h5>
+        <h5 className="fw-bold text-navy m-0">All Bookings Data</h5>
         <CustomButton
           onClick={() => openModal()}
-          className="w-20 w-sm-auto shadow-sm">
+          className="w-100 w-sm-auto shadow-sm">
           <i className="bi bi-bookmark-plus me-2"></i> Create Booking
         </CustomButton>
       </div>
 
-      {/* Table Card */}
       <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0 text-nowrap">
             <thead style={{ background: "var(--navy)", color: "white" }}>
               <tr className="small text-uppercase">
                 <th className="px-4 py-3">#</th>
-                <th>User Detail</th>
-                <th>Item / Property</th>
-                <th>Booking Date</th>
+                <th>Booking ID</th>
+                <th>User Name</th>
+                <th>Item / Property Name</th>
+                <th>Created At</th>
+                <th>Updated At</th>
+                <th>v</th>
                 <th className="text-end px-4">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {loading && data.length === 0 ? (
+              {loading && bookingList.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-5">
+                  <td colSpan="8" className="text-center py-5">
                     <div className="spinner-border text-gold"></div>
+                  </td>
+                </tr>
+              ) : bookingList.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="text-center py-5">
+                    No bookings found.
                   </td>
                 </tr>
               ) : (
                 pagination.paginatedData.map((item, i) => (
-                  <tr key={item._id}>
+                  <tr key={item._id} className="small">
                     <td className="px-4 text-muted">
                       {(pagination.currentPage - 1) * 10 + (i + 1)}
                     </td>
+                    <td
+                      className="text-muted font-monospace"
+                      style={{ fontSize: "11px" }}>
+                      {item._id}
+                    </td>
                     <td className="fw-bold text-navy">
-                      {/* Check if object (populated) or string (lookup) */}
-                      {typeof item.userId === 'object' 
-                        ? (item.userId?.fullName || item.userId?.email) 
-                        : getUserName(item.userId)}
+                      {getUserName(item.userId)}
                     </td>
                     <td>
-                      <span className="badge bg-light text-dark border">
-                         {/* Check if object (populated) or string (lookup) */}
-                        {typeof item.itemId === 'object' 
-                          ? (item.itemId?.address || item.itemId?.title) 
-                          : getItemName(item.itemId)}
+                      <span className="badge bg-info-subtle text-info border border-info-subtle">
+                        {getItemName(item.itemId)}
                       </span>
                     </td>
-                    <td className="small text-muted">
-                      {new Date(item.createdAt).toLocaleDateString()}
+                    <td className="text-muted">{formatDate(item.createdAt)}</td>
+                    <td className="text-muted">{formatDate(item.updatedAt)}</td>
+                    <td>
+                      <span className="badge bg-light text-dark border">
+                        {item.__v}
+                      </span>
                     </td>
                     <td className="text-end px-4">
                       <button
@@ -171,7 +187,6 @@ const Booknow = () => {
         <Pagination {...pagination} />
       </div>
 
-      {/* Modal */}
       {showModal && (
         <div
           className="modal d-block"
@@ -194,7 +209,7 @@ const Booknow = () => {
                 <div className="modal-body p-4">
                   <div className="mb-3">
                     <label className="small fw-bold text-muted mb-2 text-uppercase">
-                      Select Item / Listing
+                      Select Item
                     </label>
                     <select
                       className="form-select border-2 shadow-none rounded-3"
@@ -206,25 +221,29 @@ const Booknow = () => {
                       <option value="">-- Choose Listing --</option>
                       {listings.map((item) => (
                         <option key={item._id} value={item._id}>
-                          {item.address || item.title}
+                          {item.title}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div className="mb-0">
                     <label className="small fw-bold text-muted mb-2 text-uppercase">
-                      User ID / Reference
+                      Select User
                     </label>
-                    <input
-                      type="text"
-                      className="form-control border-2 shadow-none rounded-3"
-                      placeholder="Enter User ID"
+                    <select
+                      className="form-select border-2 shadow-none rounded-3"
                       value={formData.userId}
                       onChange={(e) =>
                         setFormData({ ...formData, userId: e.target.value })
                       }
-                      required
-                    />
+                      required>
+                      <option value="">-- Choose User --</option>
+                      {users.map((user) => (
+                        <option key={user._id} value={user._id}>
+                          {user.fullName || user.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
                 <div className="modal-footer border-0 p-4 pt-0 mt-3">

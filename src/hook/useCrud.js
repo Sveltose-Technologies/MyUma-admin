@@ -34,6 +34,9 @@ export const useCrud = (apiMethods) => {
         res?.bookings ||
         res?.reviews ||
         res?.footer ||
+        res?.users || // 👈 Add this for "get-all-users"
+        res?.auths ||
+        res?.owners ||
         res?.data; // res?.data will catch anything else
 
       let result = [];

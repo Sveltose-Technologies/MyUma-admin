@@ -3,34 +3,17 @@ export const BASE_URL = "https://nrislaw.rxchartsquare.com";
 export const useUtils = () => {
   const DEFAULT_IMAGE = "https://placehold.co/200x200?text=No+Image";
 
-  const getImgURL = (path) => {
-    try {
-     
-      if (!path || typeof path !== "string") {
-        return DEFAULT_IMAGE;
-      }  
+ const getImgURL = (path) => {
+   if (!path || typeof path !== "string") return DEFAULT_IMAGE;
 
-      if (path.startsWith("http://") || path.startsWith("https://")) {
-        return path;
-      }
+   // .trim() removes the trailing space from your API response
+   const cleanPath = path.trim();
 
-     
-      if (path.startsWith("data:image")) {
-        return path;
-      }
+   if (cleanPath.startsWith("http")) return cleanPath;
 
-      // ✔️ Remove extra spaces
-      const cleanPath = path.trim();
-
-      // ✔️ Add slash if missing
-      const finalPath = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
-
-      return `${BASE_URL}${finalPath}`;
-    } catch (error) {
-      console.error("Image URL error:", error);
-      return DEFAULT_IMAGE;
-    }
-  };
+   const finalPath = cleanPath.startsWith("/") ? cleanPath : `/${cleanPath}`;
+   return `${BASE_URL}${finalPath}`;
+ };
 
   const formatDate = (date) => {
     if (!date) return "N/A";

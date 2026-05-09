@@ -7,6 +7,8 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: "Dashboard", path: "/admin", icon: "bi-grid-1x2-fill" },
     { name: "Home", path: "/admin/home", icon: "bi-house-fill" },
     { name: "About Us", path: "/admin/about-us", icon: "bi-info-circle" },
+    { name: "User List", path: "/admin/user", icon: "bi-info-circle" },
+    { name: "owner List", path: "/admin/owner", icon: "bi-info-circle" },
 
     { name: "Categories", path: "/admin/categories", icon: "bi-tags" },
     {

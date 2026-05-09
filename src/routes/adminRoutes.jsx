@@ -1,4 +1,6 @@
 import { lazy } from "react";
+import UserManagement from "../pages/UserManagement";
+import OwnerList from "../pages/OwnerManagement";
 
 
 // Lazy loading all components
@@ -30,6 +32,16 @@ export const adminRoutes = [
     path: "categories",
     element: <Categories />,
     title: "Categories",
+  },
+  {
+    path: "user",
+    element: <UserManagement />,
+    title: "User List",
+  },
+  {
+    path: "owner",
+    element: <OwnerList />,
+    title: "Owner List",
   },
   {
     path: "sub-categories", // Path for Sub-Category

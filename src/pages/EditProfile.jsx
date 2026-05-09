@@ -1,278 +1,339 @@
-import React, { useEffect, useState } from "react";
-import { useCrud } from "../hook/useCrud";
-import { usePagination } from "../hook/usePagination";
-import Pagination from "../components/common/Pagination";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import { updateProfileApi } from "../services/authService";
+import { updateUser, setLoading } from "../store/slices/authSlice";
+import { useUtils } from "../hook/useUtils";
 import CustomButton from "../components/common/CustomButton";
-import {
-  getAllBooknowApi,
-  addBooknowApi,
-  updateBooknowApi,
-  deleteBooknowApi,
-  getAllListingsApi,
-  getAllUsersApi, // Assuming this service exists to fetch user names
-} from "../services/authService";
 
-const BOOKNOW_METHODS = {
-  getAll: getAllBooknowApi,
-  add: addBooknowApi,
-  update: updateBooknowApi,
-  delete: deleteBooknowApi,
-};
+const EditProfile = () => {
+  const dispatch = useDispatch();
+  const { user, loading } = useSelector((state) => state.auth);
+  const { getImgURL } = useUtils();
 
-const Booknow = () => {
-  const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
-    useCrud(BOOKNOW_METHODS);
-
-  // Extract bookings array from the response object { bookings: [...] }
-  const bookingList = data?.bookings || (Array.isArray(data) ? data : []);
-  const pagination = usePagination(bookingList, 10);
-
-  const [listings, setListings] = useState([]);
-  const [users, setUsers] = useState([]); // State to store user names
-  const [showModal, setShowModal] = useState(false);
-  const [editId, setEditId] = useState(null);
-
+  // 1. Local State
   const [formData, setFormData] = useState({
-    userId: "",
-    itemId: "",
+    fullName: "",
+    email: "",
+    contactNo: "",
+    address: "",
+    businessName: "",
+    country: "",
+    city: "",
+    role: "",
+    status: "",
+    password: "",
   });
 
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [isLoaded, setIsLoaded] = useState(false); // Flag to prevent "locking"
+
+  // 2. Load data ONLY ONCE when user object is available
   useEffect(() => {
-    fetchAll();
-    fetchSelectionData();
-  }, [fetchAll]);
-
-  const fetchSelectionData = async () => {
-    try {
-      const [listingRes, userRes] = await Promise.all([
-        getAllListingsApi(),
-        getAllUsersApi(),
-      ]);
-      setListings(listingRes?.data || listingRes?.listings || []);
-      setUsers(userRes?.data || userRes?.users || []);
-    } catch (err) {
-      console.error("Failed to fetch selection data");
-    }
-  };
-
-  // Helper: Find Item Name from ID
-  const getItemName = (id) => {
-    const found = listings.find((l) => l._id === id);
-    return found ? found.title : id;
-  };
-
-  // Helper: Find User Name from ID
-  const getUserName = (id) => {
-    const found = users.find((u) => u._id === id);
-    return found ? found.fullName || found.name : id;
-  };
-
-  const handleSave = async (e) => {
-    e.preventDefault();
-    const success = editId
-      ? await updateItem(editId, formData)
-      : await addItem(formData);
-    if (success) setShowModal(false);
-  };
-
-  const formatDate = (date) => (date ? new Date(date).toLocaleString() : "N/A");
-
-  const openModal = (item = null) => {
-    if (item) {
-      setEditId(item._id);
+    if (user && !isLoaded) {
       setFormData({
-        userId: item.userId?._id || item.userId || "",
-        itemId: item.itemId?._id || item.itemId || "",
+        fullName: user.fullName || "",
+        email: user.email || "",
+        contactNo: user.contactNo || "",
+        address: user.address || "",
+        businessName: user.businessName || "",
+        country: user.country || "",
+        city: user.city || "",
+        role: user.role || "admin",
+        status: user.status || "active",
+        password: "",
       });
-    } else {
-      setEditId(null);
-      setFormData({ userId: "", itemId: "" });
+      if (user.profileImage) {
+        setImagePreview(getImgURL(user.profileImage));
+      }
+      setIsLoaded(true); // Mark as loaded so typing doesn't trigger a reset
     }
-    setShowModal(true);
+  }, [user, getImgURL, isLoaded]);
+
+  // 3. Handle Changes (Ensures state updates when you type)
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    console.log(`Typing in ${name}: ${value}`); // Debug log
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  // 4. Save Logic
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const userId = user?._id || user?.id;
+    if (!userId) return toast.error("User ID not found");
+
+    dispatch(setLoading(true));
+    try {
+      const data = new FormData();
+
+      // Append all text fields
+      data.append("fullName", formData.fullName);
+      data.append("email", formData.email);
+      data.append("contactNo", formData.contactNo);
+      data.append("address", formData.address);
+      data.append("businessName", formData.businessName);
+      data.append("country", formData.country);
+      data.append("city", formData.city);
+      data.append("role", formData.role);
+      data.append("status", formData.status);
+
+      // Only append password if the user actually typed a new one
+      if (formData.password) {
+        data.append("password", formData.password);
+      }
+
+      // Append image if selected
+      if (selectedFile) {
+        data.append("profileImage", selectedFile);
+      }
+
+      const response = await updateProfileApi(userId, data);
+
+      if (response?.auth) {
+        dispatch(updateUser(response.auth)); // Updates Redux & LocalStorage
+        toast.success("Profile updated successfully!");
+      }
+    } catch (error) {
+      console.error("Update Error:", error);
+      toast.error(error.response?.data?.message || "Failed to update profile");
+    } finally {
+      dispatch(setLoading(false));
+    }
   };
 
   return (
-    <div className="container-fluid py-3 py-md-4">
-      <div className="mb-4">
-        <h4 className="fw-bold text-navy">Booking Management</h4>
-        <p className="text-muted small">
-          View all booking records with user and item details
-        </p>
-      </div>
-
-      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-3 gap-2">
-        <h5 className="fw-bold text-navy m-0">All Bookings Data</h5>
-        <CustomButton
-          onClick={() => openModal()}
-          className="w-100 w-sm-auto shadow-sm">
-          <i className="bi bi-bookmark-plus me-2"></i> Create Booking
-        </CustomButton>
-      </div>
-
-      <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
-        <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0 text-nowrap">
-            <thead style={{ background: "var(--navy)", color: "white" }}>
-              <tr className="small text-uppercase">
-                <th className="px-4 py-3">#</th>
-                <th>Booking ID</th>
-                <th>User Name</th>
-                <th>Item / Property Name</th>
-                <th>Created At</th>
-                <th>Updated At</th>
-                <th>v</th>
-                <th className="text-end px-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading && bookingList.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="text-center py-5">
-                    <div className="spinner-border text-gold"></div>
-                  </td>
-                </tr>
-              ) : bookingList.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="text-center py-5">
-                    No bookings found.
-                  </td>
-                </tr>
-              ) : (
-                pagination.paginatedData.map((item, i) => (
-                  <tr key={item._id} className="small">
-                    <td className="px-4 text-muted">
-                      {(pagination.currentPage - 1) * 10 + (i + 1)}
-                    </td>
-                    <td
-                      className="text-muted font-monospace"
-                      style={{ fontSize: "11px" }}>
-                      {item._id}
-                    </td>
-                    <td className="fw-bold text-navy">
-                      {getUserName(item.userId)}
-                    </td>
-                    <td>
-                      <span className="badge bg-info-subtle text-info border border-info-subtle">
-                        {getItemName(item.itemId)}
-                      </span>
-                    </td>
-                    <td className="text-muted">{formatDate(item.createdAt)}</td>
-                    <td className="text-muted">{formatDate(item.updatedAt)}</td>
-                    <td>
-                      <span className="badge bg-light text-dark border">
-                        {item.__v}
-                      </span>
-                    </td>
-                    <td className="text-end px-4">
-                      <button
-                        className="btn btn-sm btn-light border-0 me-2 shadow-sm"
-                        onClick={() => openModal(item)}>
-                        <i className="bi bi-pencil-square text-info"></i>
-                      </button>
-                      <button
-                        className="btn btn-sm btn-light border-0 shadow-sm"
-                        onClick={() => deleteItem(item._id)}>
-                        <i className="bi bi-trash3 text-danger"></i>
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+    <div className="container-fluid py-4 bg-light min-vh-100">
+      <div className="row">
+        <div className="col-12 mb-4">
+          <h3 className="fw-bold text-navy">Account Settings</h3>
+          <p className="text-muted">
+            Update your administrative profile details below.
+          </p>
         </div>
-      </div>
 
-      <div className="mt-3">
-        <Pagination {...pagination} />
-      </div>
+        {/* LEFT SIDE: AVATAR CARD */}
+        <div className="col-lg-4">
+          <div className="card border-0 shadow-sm rounded-4 text-center p-4 mb-4 bg-white">
+            <div className="position-relative d-inline-block mx-auto mb-3">
+              <img
+                src={imagePreview || "https://placehold.co/150x150?text=Admin"}
+                alt="Admin"
+                className="rounded-circle shadow border border-4 border-white"
+                style={{ width: "150px", height: "150px", objectFit: "cover" }}
+              />
+              <label
+                htmlFor="profileImage"
+                className="position-absolute bottom-0 end-0 bg-gold rounded-circle d-flex align-items-center justify-content-center shadow"
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  border: "3px solid white",
+                  cursor: "pointer",
+                }}>
+                <i className="bi bi-camera-fill text-navy"></i>
+                <input
+                  type="file"
+                  id="profileImage"
+                  name="profileImage"
+                  className="d-none"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </label>
+            </div>
+            <h5 className="fw-bold m-0">{formData.fullName || "Admin Name"}</h5>
+            <p className="text-muted small mb-3">{formData.email}</p>
+            <div className="d-flex justify-content-center gap-2">
+              <span className="badge bg-soft-primary text-primary px-3 py-2 rounded-pill">
+                ROLE: {formData.role?.toUpperCase()}
+              </span>
+              <span
+                className={`badge ${formData.status === "active" ? "bg-success" : "bg-danger"} px-3 py-2 rounded-pill`}>
+                {formData.status?.toUpperCase()}
+              </span>
+            </div>
+          </div>
+        </div>
 
-      {showModal && (
-        <div
-          className="modal d-block"
-          style={{
-            background: "rgba(0,0,0,0.5)",
-            backdropFilter: "blur(4px)",
-            zIndex: 9999,
-          }}>
-          <div className="modal-dialog modal-md modal-dialog-centered px-3">
-            <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
-              <div className="modal-header border-0 p-4 pb-0">
-                <h5 className="fw-bold text-navy m-0">
-                  {editId ? "Update Booking" : "New Booking Entry"}
-                </h5>
-                <button
-                  className="btn-close shadow-none"
-                  onClick={() => setShowModal(false)}></button>
-              </div>
-              <form onSubmit={handleSave}>
-                <div className="modal-body p-4">
-                  <div className="mb-3">
-                    <label className="small fw-bold text-muted mb-2 text-uppercase">
-                      Select Item
+        {/* RIGHT SIDE: EDITABLE FORM */}
+        <div className="col-lg-8">
+          <div className="card border-0 shadow-sm rounded-4 bg-white">
+            <div className="card-header bg-transparent border-bottom p-4">
+              <h5 className="fw-bold m-0 text-navy">
+                <i className="bi bi-person-lines-fill me-2 text-gold"></i>{" "}
+                Personal Information
+              </h5>
+            </div>
+            <div className="card-body p-4">
+              <form onSubmit={handleSubmit}>
+                <div className="row g-4">
+                  {/* Full Name */}
+                  <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">
+                      FULL NAME
                     </label>
-                    <select
-                      className="form-select border-2 shadow-none rounded-3"
-                      value={formData.itemId}
-                      onChange={(e) =>
-                        setFormData({ ...formData, itemId: e.target.value })
-                      }
-                      required>
-                      <option value="">-- Choose Listing --</option>
-                      {listings.map((item) => (
-                        <option key={item._id} value={item._id}>
-                          {item.title}
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      type="text"
+                      name="fullName"
+                      className="form-control bg-light border-0 py-2"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </div>
-                  <div className="mb-0">
-                    <label className="small fw-bold text-muted mb-2 text-uppercase">
-                      Select User
+
+                  {/* Email */}
+                  <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">
+                      EMAIL ADDRESS
                     </label>
-                    <select
-                      className="form-select border-2 shadow-none rounded-3"
-                      value={formData.userId}
-                      onChange={(e) =>
-                        setFormData({ ...formData, userId: e.target.value })
-                      }
-                      required>
-                      <option value="">-- Choose User --</option>
-                      {users.map((user) => (
-                        <option key={user._id} value={user._id}>
-                          {user.fullName || user.name}
-                        </option>
-                      ))}
-                    </select>
+                    <input
+                      type="email"
+                      name="email"
+                      className="form-control bg-light border-0 py-2"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </div>
-                </div>
-                <div className="modal-footer border-0 p-4 pt-0 mt-3">
-                  <div className="row w-100 g-2 m-0">
-                    <div className="col-6">
-                      <CustomButton
-                        variant="cancel"
-                        className="w-100"
-                        onClick={() => setShowModal(false)}>
-                        Cancel
-                      </CustomButton>
-                    </div>
-                    <div className="col-6">
-                      <CustomButton
-                        type="submit"
-                        loading={loading}
-                        className="w-100">
-                        {editId ? "Update" : "Save"}
-                      </CustomButton>
-                    </div>
+
+                  {/* Contact */}
+                  <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">
+                      CONTACT NUMBER
+                    </label>
+                    <input
+                      type="text"
+                      name="contactNo"
+                      className="form-control bg-light border-0 py-2"
+                      value={formData.contactNo}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  {/* Business Name */}
+                  <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">
+                      BUSINESS NAME
+                    </label>
+                    <input
+                      type="text"
+                      name="businessName"
+                      className="form-control bg-light border-0 py-2"
+                      value={formData.businessName}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  {/* Country */}
+                  <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">
+                      COUNTRY
+                    </label>
+                    <input
+                      type="text"
+                      name="country"
+                      className="form-control bg-light border-0 py-2"
+                      value={formData.country}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  {/* City */}
+                  <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">
+                      CITY
+                    </label>
+                    <input
+                      type="text"
+                      name="city"
+                      className="form-control bg-light border-0 py-2"
+                      value={formData.city}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  {/* Address */}
+                  <div className="col-12">
+                    <label className="form-label small fw-bold text-muted">
+                      OFFICE ADDRESS
+                    </label>
+                    <textarea
+                      name="address"
+                      className="form-control bg-light border-0 py-2"
+                      rows="2"
+                      value={formData.address}
+                      onChange={handleInputChange}></textarea>
+                  </div>
+
+                  {/* Security Header */}
+                  <div className="col-12 mt-4 pt-3 border-top">
+                    <h6 className="fw-bold mb-3 text-navy">
+                      <i className="bi bi-lock-fill me-2 text-gold"></i>{" "}
+                      Security & Role
+                    </h6>
+                  </div>
+
+                  {/* Password */}
+                  <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">
+                      CHANGE PASSWORD
+                    </label>
+                    <input
+                      type="password"
+                      name="password"
+                      className="form-control bg-light border-0 py-2"
+                      placeholder="Leave empty to keep current"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+
+                  {/* Role (Read Only as requested) */}
+                  <div className="col-md-6">
+                    <label className="form-label small fw-bold text-muted">
+                      ADMIN ROLE
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control bg-light border-0 py-2 text-muted"
+                      value={formData.role}
+                      disabled
+                    />
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="col-12 d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <CustomButton
+                      variant="cancel"
+                      onClick={() => window.history.back()}>
+                      Discard Changes
+                    </CustomButton>
+                    <CustomButton type="submit" loading={loading}>
+                      Save All Updates
+                    </CustomButton>
                   </div>
                 </div>
               </form>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 };
 
-export default Booknow;
+export default EditProfile;

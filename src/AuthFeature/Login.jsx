@@ -193,6 +193,50 @@ const Login = () => {
     }
   };
 
+
+
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   dispatch(setLoading(true));
+  //   try {
+  //     const response = await loginApi(credentials);
+
+  //     // Ye log aapko console mein dikhayega ki role sach mein aa raha hai ya nahi
+  //     console.log("Full Auth Object from API:", response?.auth);
+
+  //     if (response && response.auth) {
+  //       // Agar backend se role aa hi nahi raha, toh userRole undefined hoga
+  //       const userRole = response.auth.role
+  //         ? response.auth.role.trim().toLowerCase()
+  //         : null;
+
+  //       // Debugging: Agar role nahi mil raha toh alert dikhao
+  //       if (!userRole) {
+  //         toast.error(
+  //           "Error: Backend is not sending the 'role' field. Please check backend API.",
+  //         );
+  //         dispatch(setLoading(false));
+  //         return;
+  //       }
+
+  //       if (userRole !== "admin") {
+  //         toast.error(`Access Denied: Your role is '${userRole}', not admin.`);
+  //         dispatch(setLoading(false));
+  //         return;
+  //       }
+
+  //       startSession();
+  //       dispatch(setLogin(response));
+  //       toast.success("Admin Login Successful!");
+  //       navigate("/admin");
+  //     }
+  //   } catch (error) {
+  //     console.error("Login Error:", error);
+  //     toast.error(error.response?.data?.message || "Invalid Email or Password");
+  //   } finally {
+  //     dispatch(setLoading(false));
+  //   }
+  // };
   return (
     <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center login-screen">
       <div className="col-11 col-sm-8 col-md-5 col-lg-4 col-xl-3 login-card shadow-lg border-0 overflow-hidden">

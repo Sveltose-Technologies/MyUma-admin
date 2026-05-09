@@ -76,7 +76,7 @@ const FooterText = () => {
       <div className="mb-4">
         <h4 className="fw-bold text-navy">Footer Management</h4>
         <p className="text-muted small">
-          Manage website footer details like contact info and address
+          Manage website footer details like and address
         </p>
       </div>
 
