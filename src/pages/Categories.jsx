@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useCrud } from "../hook/useCrud";
 import { usePagination } from "../hook/usePagination";
+import { useUtils } from "../hook/useUtils"; // Import for getImgURL
 import Pagination from "../components/common/Pagination";
 import CustomButton from "../components/common/CustomButton";
 import {
@@ -18,6 +19,9 @@ const CATEGORY_API_CONFIG = {
 };
 
 const Categories = () => {
+  const { getImgURL } = useUtils(); // Utility to handle image paths
+  const fileInputRef = useRef(null);
+
   const {
     data: categories,
     loading,
@@ -26,21 +30,43 @@ const Categories = () => {
     updateItem,
     deleteItem,
   } = useCrud(CATEGORY_API_CONFIG);
+
   const pagination = usePagination(categories, 10);
 
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
   const [name, setName] = useState("");
 
+  // Image States
+  const [imageFile, setImageFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
+
+    // Use FormData for Multipart/Form-Data (Image Upload)
+    const formData = new FormData();
+    formData.append("name", name);
+    if (imageFile) {
+      formData.append("image", imageFile);
+    }
+
     const success = editId
-      ? await updateItem(editId, { name })
-      : await addItem({ name });
+      ? await updateItem(editId, formData)
+      : await addItem(formData);
+
     if (success) handleCloseModal();
   };
 
@@ -48,20 +74,29 @@ const Categories = () => {
     setShowModal(false);
     setEditId(null);
     setName("");
+    setImageFile(null);
+    setPreviewUrl("");
+  };
+
+  const openEditModal = (item) => {
+    setEditId(item._id);
+    setName(item.name);
+    setPreviewUrl(getImgURL(item.image)); // Show existing image in preview
+    setShowModal(true);
   };
 
   return (
     <div className="container-fluid py-3 py-md-4">
-      {/* Header Section */}
       <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 mb-4">
         <div>
           <h4 className="fw-bold m-0" style={{ color: "var(--navy)" }}>
             Categories
           </h4>
-          <p className="text-muted small m-0">Manage website categories</p>
+          <p className="text-muted small m-0">
+            Manage website categories and icons
+          </p>
         </div>
 
-        {/* Reusable Button for Header */}
         <CustomButton
           onClick={() => setShowModal(true)}
           className="px-4 shadow-sm">
@@ -69,15 +104,13 @@ const Categories = () => {
         </CustomButton>
       </div>
 
-      {/* Table Section */}
       <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0">
             <thead style={{ backgroundColor: "var(--navy)", color: "white" }}>
               <tr>
-                <th className="px-4 py-3" style={{ width: "80px" }}>
-                  #
-                </th>
+                <th className="px-4 py-3">#</th>
+                <th className="py-3">Image</th>
                 <th className="py-3">Category Name</th>
                 <th className="text-end px-4 py-3">Actions</th>
               </tr>
@@ -88,17 +121,29 @@ const Categories = () => {
                   <td className="px-4 fw-bold text-muted">
                     {(pagination.currentPage - 1) * 10 + (index + 1)}
                   </td>
+                  <td>
+                    <img
+                      src={getImgURL(item.image)}
+                      alt={item.name}
+                      className="rounded border shadow-sm"
+                      style={{
+                        width: "45px",
+                        height: "45px",
+                        objectFit: "cover",
+                      }}
+                      onError={(e) =>
+                        (e.target.src =
+                          "https://placehold.co/45x45?text=No+Img")
+                      }
+                    />
+                  </td>
                   <td className="fw-bold" style={{ color: "var(--navy)" }}>
                     {item.name}
                   </td>
                   <td className="text-end px-4">
                     <button
                       className="btn btn-sm bg-light border-0 me-2 shadow-sm"
-                      onClick={() => {
-                        setEditId(item._id);
-                        setName(item.name);
-                        setShowModal(true);
-                      }}
+                      onClick={() => openEditModal(item)}
                       style={{ borderRadius: "8px" }}>
                       <i
                         className="bi bi-pencil-square"
@@ -120,7 +165,6 @@ const Categories = () => {
 
       <Pagination {...pagination} />
 
-      {/* Responsive Modal */}
       {showModal && (
         <div
           className="modal d-block"
@@ -141,22 +185,62 @@ const Categories = () => {
               </div>
               <form onSubmit={handleSave}>
                 <div className="modal-body p-4">
-                  <label className="form-label small fw-bold text-muted text-uppercase">
-                    Category Name
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control form-control-lg border-2 shadow-none"
-                    style={{ borderRadius: "12px" }}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    
-                  />
+                  {/* Category Name */}
+                  <div className="mb-3">
+                    <label className="form-label small fw-bold text-muted text-uppercase">
+                      Category Name
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control form-control-lg border-2 shadow-none"
+                      style={{ borderRadius: "12px" }}
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* Image Upload */}
+                  <div className="mb-2">
+                    <label className="form-label small fw-bold text-muted text-uppercase">
+                      Category Image
+                    </label>
+                    <div
+                      className="border-2 border-dashed rounded-4 p-3 text-center position-relative bg-light"
+                      style={{
+                        border: "2px dashed #dee2e6",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => fileInputRef.current.click()}>
+                      {previewUrl ? (
+                        <img
+                          src={previewUrl}
+                          alt="Preview"
+                          style={{ height: "100px", objectFit: "contain" }}
+                          className="rounded"
+                        />
+                      ) : (
+                        <div className="py-3">
+                          <i className="bi bi-cloud-arrow-up fs-2 text-muted"></i>
+                          <p className="m-0 small text-muted">
+                            Click to upload image
+                          </p>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="d-none"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                      />
+                    </div>
+                  </div>
                 </div>
+
                 <div className="modal-footer border-0 p-4 pt-0">
                   <div className="row w-100 g-2 m-0">
                     <div className="col-6 p-0 pe-1">
-                      {/* Reusable Cancel Button */}
                       <CustomButton
                         variant="cancel"
                         className="w-100"
@@ -165,7 +249,6 @@ const Categories = () => {
                       </CustomButton>
                     </div>
                     <div className="col-6 p-0 ps-1">
-                      {/* Reusable Submit/Save Button */}
                       <CustomButton
                         type="submit"
                         variant="gold"
