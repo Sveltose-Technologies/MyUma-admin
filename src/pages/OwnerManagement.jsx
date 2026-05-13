@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useCrud } from "../hook/useCrud";
 import { usePagination } from "../hook/usePagination";
 import { useUtils } from "../hook/useUtils";
@@ -8,27 +8,34 @@ import { getAllUsersApi, updateProfileApi } from "../services/authService";
 import api from "../services/api";
 
 const OWNER_METHODS = {
-  getAll: getAllUsersApi, // This fetches all auths, we will filter for "owner"
+  getAll: getAllUsersApi,
   update: updateProfileApi,
   delete: async (id) => await api.delete(`/auth/delete/${id}`),
 };
 
 const OwnerList = () => {
   const { getImgURL } = useUtils();
+  const fileInputRef = useRef(null);
+
   const { data, loading, fetchAll, updateItem, deleteItem } =
     useCrud(OWNER_METHODS);
 
-  // CRITICAL: Filter only those with role "owner"
+  // Filter only those with role "owner"
   const ownersOnly = data.filter((u) => u.role === "owner");
   const pagination = usePagination(ownersOnly, 10);
 
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
+
+  // States for Image Handling
+  const [imageFile, setImageFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState("");
+
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     contactNo: "",
-    businessName: "", // Added for owners
+    businessName: "",
     address: "",
     city: "",
     country: "",
@@ -44,6 +51,15 @@ const OwnerList = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  // Handle File Selection
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setPreviewImage(URL.createObjectURL(file)); // Show local preview
+    }
+  };
+
   const openEditModal = (owner) => {
     setEditId(owner._id);
     setFormData({
@@ -56,13 +72,30 @@ const OwnerList = () => {
       country: owner.country || "",
       status: owner.status || "active",
     });
+    // Set initial preview from existing image
+    setPreviewImage(getImgURL(owner.profileImage));
+    setImageFile(null);
     setShowModal(true);
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    const success = await updateItem(editId, formData);
-    if (success) setShowModal(false);
+
+    // Use FormData for multipart/form-data support
+    const dataToSend = new FormData();
+    Object.keys(formData).forEach((key) => {
+      dataToSend.append(key, formData[key]);
+    });
+
+    if (imageFile) {
+      dataToSend.append("profileImage", imageFile);
+    }
+
+    const success = await updateItem(editId, dataToSend);
+    if (success) {
+      setShowModal(false);
+      fetchAll(); // Refresh list to show updated photo
+    }
   };
 
   return (
@@ -70,7 +103,7 @@ const OwnerList = () => {
       <div className="mb-4">
         <h4 className="fw-bold text-navy m-0">Owner Directory</h4>
         <p className="text-muted small">
-          Manage all business owners and their listed property parameters
+          Manage all business owners and their profile parameters
         </p>
       </div>
 
@@ -78,7 +111,7 @@ const OwnerList = () => {
         <div className="table-responsive">
           <table
             className="table table-hover align-middle mb-0"
-            style={{ minWidth: "1600px" }}>
+            style={{ minWidth: "1400px" }}>
             <thead className="bg-white text-secondary small text-uppercase border-bottom">
               <tr>
                 <th className="ps-4 py-3">Photo</th>
@@ -86,9 +119,7 @@ const OwnerList = () => {
                 <th>Business Name</th>
                 <th>Email Address</th>
                 <th>Mobile Number</th>
-                <th>Country</th>
-                <th>City</th>
-                <th>Full Address</th>
+                <th>Location</th>
                 <th>Status</th>
                 <th className="text-end pe-4">Actions</th>
               </tr>
@@ -101,35 +132,22 @@ const OwnerList = () => {
                       <img
                         src={getImgURL(owner.profileImage)}
                         alt="Owner"
-                        className="rounded-circle border shadow-sm"
+                        className="rounded-circle border"
                         style={{
                           width: "45px",
                           height: "45px",
                           objectFit: "cover",
                         }}
-                        onError={(e) => {
-                          e.target.src =
-                            "https://placehold.co/100x100?text=Owner";
-                        }}
                       />
                     </td>
                     <td className="fw-bold text-navy">{owner.fullName}</td>
-                    <td className="fw-bold text-gold text-uppercase small">
+                    <td className="text-gold fw-bold small">
                       {owner.businessName || "—"}
                     </td>
-                    <td className="small text-dark">{owner.email}</td>
-                    <td className="small text-dark">
-                      {owner.contactNo || "—"}
-                    </td>
-                    <td className="small text-muted">{owner.country || "—"}</td>
-                    <td className="small text-muted">{owner.city || "—"}</td>
+                    <td className="small">{owner.email}</td>
+                    <td className="small">{owner.contactNo || "—"}</td>
                     <td className="small text-muted">
-                      <div
-                        className="text-truncate"
-                        style={{ maxWidth: "180px" }}
-                        title={owner.address}>
-                        {owner.address || "—"}
-                      </div>
+                      {owner.city}, {owner.country}
                     </td>
                     <td>
                       <span
@@ -155,12 +173,8 @@ const OwnerList = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="10" className="text-center py-5">
-                    {loading ? (
-                      <div className="spinner-border text-gold spinner-border-sm"></div>
-                    ) : (
-                      "No Owners Found"
-                    )}
+                  <td colSpan="8" className="text-center py-5">
+                    No owners found.
                   </td>
                 </tr>
               )}
@@ -177,7 +191,7 @@ const OwnerList = () => {
       {showModal && (
         <div
           className="modal d-block"
-          style={{ background: "rgba(0,0,0,0.5)", zIndex: 1060 }}>
+          style={{ background: "rgba(0,0,0,0.6)", zIndex: 1060 }}>
           <div className="modal-dialog modal-dialog-centered modal-lg">
             <div className="modal-content border-0 rounded-4 shadow-lg">
               <div className="modal-header border-0 p-4 pb-0">
@@ -188,6 +202,43 @@ const OwnerList = () => {
               </div>
               <form onSubmit={handleUpdate}>
                 <div className="modal-body p-4">
+                  {/* --- PROFILE IMAGE UPLOAD --- */}
+                  <div className="text-center mb-4">
+                    <div className="position-relative d-inline-block">
+                      <img
+                        src={previewImage}
+                        alt="Preview"
+                        className="rounded-circle border shadow-sm"
+                        style={{
+                          width: "120px",
+                          height: "120px",
+                          objectFit: "cover",
+                        }}
+                        onError={(e) => {
+                          e.target.src =
+                            "https://placehold.co/120x120?text=Owner";
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle shadow"
+                        onClick={() => fileInputRef.current.click()}
+                        style={{ width: "35px", height: "35px", padding: 0 }}>
+                        <i className="bi bi-camera-fill"></i>
+                      </button>
+                    </div>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="d-none"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                    <p className="small text-muted mt-2">
+                      Update Profile Photo
+                    </p>
+                  </div>
+
                   <div className="row g-3">
                     <div className="col-md-6">
                       <label className="form-label small fw-bold text-muted">
@@ -241,18 +292,6 @@ const OwnerList = () => {
                     </div>
                     <div className="col-md-6">
                       <label className="form-label small fw-bold text-muted">
-                        COUNTRY
-                      </label>
-                      <input
-                        type="text"
-                        name="country"
-                        className="form-control bg-light border-0"
-                        value={formData.country}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label small fw-bold text-muted">
                         CITY
                       </label>
                       <input
@@ -263,9 +302,21 @@ const OwnerList = () => {
                         onChange={handleInputChange}
                       />
                     </div>
+                    <div className="col-md-6">
+                      <label className="form-label small fw-bold text-muted">
+                        COUNTRY
+                      </label>
+                      <input
+                        type="text"
+                        name="country"
+                        className="form-control bg-light border-0"
+                        value={formData.country}
+                        onChange={handleInputChange}
+                      />
+                    </div>
                     <div className="col-md-12">
                       <label className="form-label small fw-bold text-muted">
-                        STATUS
+                        ACCOUNT STATUS
                       </label>
                       <select
                         name="status"
@@ -289,18 +340,18 @@ const OwnerList = () => {
                     </div>
                   </div>
                 </div>
-                <div className="modal-footer border-0 p-4 pt-0 d-flex gap-2">
+                <div className="modal-footer border-0 p-4 pt-0 d-flex gap-3">
                   <CustomButton
                     variant="cancel"
-                    className="w-100"
+                    className="flex-grow-1"
                     onClick={() => setShowModal(false)}>
                     Cancel
                   </CustomButton>
                   <CustomButton
                     type="submit"
-                    className="w-100"
+                    className="flex-grow-1"
                     loading={loading}>
-                    Save Owner Info
+                    Save Changes
                   </CustomButton>
                 </div>
               </form>

@@ -479,8 +479,7 @@ export const getAllItemsApi = async () => {
   return res.data;
 };
 
-
-// Add these to your authService.js
+// services/authService.js
 
 // To get all owners for the admin sidebar
 export const getAllOwnersApi = async () => {
@@ -488,17 +487,19 @@ export const getAllOwnersApi = async () => {
   return response.data;
 };
 
-// services/authService.js
+// Admin Chat Methods
 export const adminChatMethods = {
-  getHistory: async (userId, ownerId) => {
-    const res = await api.get(`/chat/get-by-user-owner/${userId}/${ownerId}`);
+  // Fetches history between an Admin (acting as user) and an Owner
+  getHistory: async (adminId, ownerId) => {
+    const res = await api.get(`/chat/get-by-user-owner/${adminId}/${ownerId}`);
     return res.data;
   },
+  // Sends a message
   send: async (payload) => {
     const res = await api.post("/chat/send", payload);
     return res.data;
   },
-  // ADD THIS LINE
+  // Deletes a specific message by ID
   deleteMessage: async (messageId) => {
     const res = await api.delete(`/chat/delete/${messageId}`);
     return res.data;
