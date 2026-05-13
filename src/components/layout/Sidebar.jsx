@@ -37,9 +37,9 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: "ContactUs", path: "/admin/contact-us", icon: "bi-telephone" },
 
     {
-      name: "Legal Docs",
-      path: "/admin/legal-docs",
-      icon: "bi-file-earmark-lock",
+      name: " Messages",
+      path: "/admin/messages",
+      icon: "bi-chat-dots",
     },
     {
       name: "Footer Text",

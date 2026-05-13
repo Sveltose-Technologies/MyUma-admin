@@ -22,6 +22,7 @@ const Booknow = lazy(() => import("../pages/Booknow"));
 const Testimonials = lazy(() => import("../pages/Testimonials")); 
 const SubCategories = lazy(() => import("../pages/SubCategories")); 
 const Reviews = lazy(() => import("../pages/Reviews")); 
+const Messages = lazy(() => import("../pages/Messages"));
 export const adminRoutes = [
   {
     path: "",
@@ -42,6 +43,11 @@ export const adminRoutes = [
     path: "owner",
     element: <OwnerList />,
     title: "Owner List",
+  },
+   {
+    path: "messages", // URL: /admin/owner-messages
+    element: <Messages />,
+    title: " Messages",
   },
   {
     path: "sub-categories", // Path for Sub-Category

@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { storage } from "../../utils/storage"; // Import the utility fixed above
-
+import { storage } from "../../utils/storage";
 const initialState = {
   user: storage.getUser(),
   token: storage.getToken(),
