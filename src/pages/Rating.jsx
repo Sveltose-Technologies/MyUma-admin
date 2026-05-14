@@ -6,28 +6,28 @@ import CustomButton from "../components/common/CustomButton";
 import TextEditor from "../components/common/TextEditor";
 import {
   getAllRatingsApi,
-  addRatingApi,
   updateRatingApi,
   deleteRatingApi,
   getAllListingsApi,
+  getAllUsersApi, // Added to fetch user names
 } from "../services/authService";
 
 const RATING_METHODS = {
   getAll: getAllRatingsApi,
-  add: addRatingApi,
   update: updateRatingApi,
   delete: deleteRatingApi,
 };
 
 const Rating = () => {
-  const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
+  // Removed addItem to disable create functionality
+  const { data, loading, fetchAll, updateItem, deleteItem } =
     useCrud(RATING_METHODS);
 
-  // Ratings are inside res.data based on your JSON
   const ratingList = Array.isArray(data) ? data : data?.data || [];
   const pagination = usePagination(ratingList, 10);
 
   const [listings, setListings] = useState([]);
+  const [users, setUsers] = useState([]); // State for user lookup
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
 
@@ -40,32 +40,40 @@ const Rating = () => {
 
   useEffect(() => {
     fetchAll();
-    fetchListings();
+    fetchHelperData();
   }, [fetchAll]);
 
-  // Fetch all service listings for the dropdown and lookup
-  const fetchListings = async () => {
+  const fetchHelperData = async () => {
     try {
-      const res = await getAllListingsApi();
-      // Based on your console: res.listings contains the array
-      setListings(res?.listings || []);
+      const [listingRes, userRes] = await Promise.all([
+        getAllListingsApi(),
+        getAllUsersApi(),
+      ]);
+      setListings(listingRes?.listings || []);
+      setUsers(userRes?.auths || userRes?.data || []);
     } catch (err) {
-      console.error("Failed to fetch listings", err);
+      console.error("Failed to fetch helper data", err);
     }
   };
 
-  /**
-   * LOOKUP LOGIC
-   * Finds the title of the service based on the itemId
-   */
+  // LOOKUP: Find Service Name
   const getItemName = (id) => {
     if (!id) return "---";
     const searchId = typeof id === "object" ? id._id : id;
-    const found = listings.find((item) => item._id === searchId);
+    const found = listings.find(
+      (item) => String(item._id) === String(searchId),
+    );
     return found ? found.title : "Unknown Service";
   };
 
-  // Render Stars UI
+  // LOOKUP: Find User Name (fullName)
+  const getUserDisplay = (uid) => {
+    const id = uid?._id || uid;
+    if (!id) return "Unknown User";
+    const found = users.find((u) => String(u._id) === String(id));
+    return found ? found.fullName : "Unknown User";
+  };
+
   const renderStars = (rating) => {
     return [...Array(5)].map((_, i) => (
       <i
@@ -75,33 +83,22 @@ const Rating = () => {
     ));
   };
 
-  const stripHtml = (html) => {
-    if (!html) return "No comment";
-    const doc = new DOMParser().parseFromString(html, "text/html");
-    return doc.body.textContent || "";
-  };
-
   const handleSave = async (e) => {
     e.preventDefault();
-    const success = editId
-      ? await updateItem(editId, formData)
-      : await addItem(formData);
-    if (success) setShowModal(false);
+    if (editId) {
+      const success = await updateItem(editId, formData);
+      if (success) setShowModal(false);
+    }
   };
 
-  const openModal = (item = null) => {
-    if (item) {
-      setEditId(item._id);
-      setFormData({
-        userId: item.userId?._id || item.userId || "",
-        itemId: item.itemId?._id || item.itemId || "",
-        rating: item.rating || "",
-        comment: item.comment || "",
-      });
-    } else {
-      setEditId(null);
-      setFormData({ userId: "", itemId: "", rating: "", comment: "" });
-    }
+  const openEditModal = (item) => {
+    setEditId(item._id);
+    setFormData({
+      userId: item.userId?._id || item.userId || "",
+      itemId: item.itemId?._id || item.itemId || "",
+      rating: item.rating || "",
+      comment: item.comment || "",
+    });
     setShowModal(true);
   };
 
@@ -115,9 +112,7 @@ const Rating = () => {
             Manage and moderate customer feedback
           </p>
         </div>
-        <button className="uma-btn-navy uma-btn" onClick={() => openModal()}>
-          <i className="bi bi-plus-lg me-2"></i> ADD REVIEW
-        </button>
+        {/* ADD REVIEW button removed */}
       </div>
 
       {/* Table Card */}
@@ -127,9 +122,8 @@ const Rating = () => {
             <thead className="bg-navy text-white">
               <tr className="small text-uppercase ls-1">
                 <th className="px-4 py-3">#</th>
-                <th>User</th>
+                <th>User Name</th>
                 <th>Service Name</th>
-                <th>Comment</th>
                 <th>Rating</th>
                 <th>Date</th>
                 <th className="text-end px-4">Actions</th>
@@ -138,7 +132,7 @@ const Rating = () => {
             <tbody>
               {loading && ratingList.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="text-center py-5">
+                  <td colSpan="6" className="text-center py-5">
                     <div className="spinner-border text-tan"></div>
                   </td>
                 </tr>
@@ -150,28 +144,13 @@ const Rating = () => {
                     </td>
                     <td>
                       <div className="fw-bold text-navy">
-                        {item.userId?.fullName || "Customer"}
-                      </div>
-                      <div
-                        className="text-muted small"
-                        style={{ fontSize: "10px" }}>
-                        ID:{" "}
-                        {typeof item.userId === "string"
-                          ? item.userId
-                          : item.userId?._id}
+                        {getUserDisplay(item.userId)}
                       </div>
                     </td>
                     <td>
-                      <span className="badge bg-tan text-navy border-0 px-2 py-1">
+                      <span className="badge bg-black text-white border-0 px-2 py-1">
                         {getItemName(item.itemId)}
                       </span>
-                    </td>
-                    <td
-                      className="text-muted small"
-                      style={{ maxWidth: "200px" }}>
-                      <div className="text-truncate">
-                        {stripHtml(item.comment)}
-                      </div>
                     </td>
                     <td>{renderStars(item.rating)}</td>
                     <td className="text-muted small">
@@ -181,7 +160,7 @@ const Rating = () => {
                       <div className="btn-group border rounded shadow-sm bg-white">
                         <button
                           className="btn btn-sm btn-white border-end"
-                          onClick={() => openModal(item)}>
+                          onClick={() => openEditModal(item)}>
                           <i className="bi bi-pencil-square text-primary"></i>
                         </button>
                         <button
@@ -199,12 +178,11 @@ const Rating = () => {
         </div>
       </div>
 
-      {/* Pagination */}
       <div className="mt-4">
         <Pagination {...pagination} />
       </div>
 
-      {/* Add/Edit Modal */}
+      {/* Edit Modal */}
       {showModal && (
         <div
           className="modal d-block"
@@ -212,9 +190,7 @@ const Rating = () => {
           <div className="modal-dialog modal-lg modal-dialog-centered px-3">
             <div className="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
               <div className="modal-header bg-navy text-white border-0 p-4">
-                <h5 className="fw-800 m-0 ls-1">
-                  {editId ? "UPDATE REVIEW" : "WRITE NEW REVIEW"}
-                </h5>
+                <h5 className="fw-800 m-0 ls-1">UPDATE REVIEW</h5>
                 <button
                   type="button"
                   className="btn-close btn-close-white shadow-none"
@@ -253,7 +229,6 @@ const Rating = () => {
                         className="form-control border-gold"
                         min="1"
                         max="5"
-                        placeholder="e.g. 5"
                         value={formData.rating}
                         onChange={(e) =>
                           setFormData({ ...formData, rating: e.target.value })
@@ -264,18 +239,22 @@ const Rating = () => {
 
                     <div className="col-md-6">
                       <label className="small fw-800 text-navy mb-2 ls-1">
-                        USER REFERENCE ID
+                        USER (fullName)
                       </label>
-                      <input
-                        type="text"
-                        className="form-control border-gold"
-                        placeholder="Paste User ID"
+                      <select
+                        className="form-select border-gold"
                         value={formData.userId}
                         onChange={(e) =>
                           setFormData({ ...formData, userId: e.target.value })
                         }
-                        required
-                      />
+                        required>
+                        <option value="">-- Select User --</option>
+                        {users.map((u) => (
+                          <option key={u._id} value={u._id}>
+                            {u.fullName}
+                          </option>
+                        ))}
+                      </select>
                     </div>
 
                     <div className="col-12">
@@ -302,7 +281,7 @@ const Rating = () => {
                     CANCEL
                   </button>
                   <button type="submit" className="uma-btn-navy uma-btn px-5">
-                    {editId ? "UPDATE REVIEW" : "PUBLISH REVIEW"}
+                    UPDATE REVIEW
                   </button>
                 </div>
               </form>

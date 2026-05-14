@@ -505,3 +505,32 @@ export const adminChatMethods = {
     return res.data;
   }
 };
+
+// ==========================================
+// 11. FAVORITE MANAGEMENT APIS
+// ==========================================
+export const getAllFavoritesApi = async () => {
+  try {
+    const response = await api.get("/favorite/get-all");
+    console.log("LOG: Favorites API Response:", response.data); // This prints to console
+    return response.data; // MUST return .data for useCrud to work
+  } catch (error) {
+    console.error("LOG: Favorites Get Error:", error);
+    throw error;
+  }
+};
+
+export const addFavoriteApi = async (data) => {
+  const response = await api.post("/favorite/add", data);
+  return response.data;
+};
+
+export const updateFavoriteApi = async (id, data) => {
+  const response = await api.put(`/favorite/update/${id}`, data);
+  return response.data;
+};
+
+export const deleteFavoriteApi = async (id) => {
+  const response = await api.delete(`/favorite/delete/${id}`);
+  return response.data;
+};

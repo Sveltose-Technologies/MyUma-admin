@@ -34,6 +34,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       icon: "bi-chat-quote-fill",
     },
     { name: "Comments", path: "/admin/comments", icon: "bi-chat-dots" },
+    { name: "Favorites", path: "/admin/favorites", icon: "bi-heart-fill" },
     { name: "ContactUs", path: "/admin/contact-us", icon: "bi-telephone" },
 
     {

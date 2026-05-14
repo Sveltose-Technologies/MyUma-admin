@@ -37,6 +37,7 @@ export const useCrud = (apiMethods) => {
         res?.users || // 👈 Add this for "get-all-users"
         res?.auths ||
         res?.owners ||
+        res?.favorites ||
         res?.data; // res?.data will catch anything else
 
       let result = [];
