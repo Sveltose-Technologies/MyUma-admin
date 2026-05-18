@@ -11,6 +11,7 @@ import {
   deleteListingApi,
   getAllCategoriesApi,
   getAllSubCategoriesApi,
+  getAllOwnersApi, // Added this to fetch owners for the dropdown
 } from "../services/authService";
 
 const LISTING_METHODS = {
@@ -28,16 +29,19 @@ const NewListings = () => {
 
   const [categories, setCategories] = useState([]);
   const [allSubCategories, setAllSubCategories] = useState([]);
+  const [owners, setOwners] = useState([]); // State for owners dropdown
   const [filteredSubCats, setFilteredSubCats] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
 
   const [formData, setFormData] = useState({
     categoryId: "",
-    subCategoryId: "", // Updated to match your API spec
+    subCategoryId: "",
+    ownerId: "", // New Parameter
     title: "",
     address: "",
     phone: "",
+    youtubeVideo: "", // New Parameter
     twitter: "",
     facebook: "",
     linkedin: "",
@@ -51,12 +55,14 @@ const NewListings = () => {
   useEffect(() => {
     fetchAll();
     const fetchInitialData = async () => {
-      const [catRes, subRes] = await Promise.all([
+      const [catRes, subRes, ownerRes] = await Promise.all([
         getAllCategoriesApi(),
         getAllSubCategoriesApi(),
+        getAllOwnersApi(), // Fetch owners from your auth service
       ]);
       setCategories(catRes?.categories || []);
       setAllSubCategories(subRes?.data || []);
+      setOwners(ownerRes?.data || []); // Assuming response has a data array
     };
     fetchInitialData();
   }, [fetchAll]);
@@ -71,41 +77,6 @@ const NewListings = () => {
       setFilteredSubCats([]);
     }
   }, [formData.categoryId, allSubCategories]);
-
-  const renderSocialIcons = (item) => {
-    const socials = [
-      { key: "facebook", icon: "bi-facebook", color: "#1877F2" },
-      { key: "instagram", icon: "bi-instagram", color: "#E4405F" },
-      { key: "twitter", icon: "bi-twitter-x", color: "#000000" },
-      { key: "linkedin", icon: "bi-linkedin", color: "#0A66C2" },
-      { key: "youtube", icon: "bi-youtube", color: "#FF0000" },
-      { key: "whatsappNo", icon: "bi-whatsapp", color: "#25D366", isWA: true },
-    ];
-
-    return (
-      <div className="d-flex gap-2">
-        {socials.map((s) => {
-          const value = item[s.key];
-          if (!value) return null;
-          const href = s.isWA
-            ? `https://wa.me/${value.replace(/\D/g, "")}`
-            : value.startsWith("http")
-              ? value
-              : `https://${value}`;
-          return (
-            <a
-              key={s.key}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: s.color, fontSize: "1.1rem" }}>
-              <i className={`bi ${s.icon}`}></i>
-            </a>
-          );
-        })}
-      </div>
-    );
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -141,7 +112,8 @@ const NewListings = () => {
       setFormData({
         ...item,
         categoryId: item.categoryId?._id || item.categoryId,
-        subCategoryId: item.subCategoryId?._id || item.subCategoryId || "", // Standardized
+        subCategoryId: item.subCategoryId?._id || item.subCategoryId || "",
+        ownerId: item.ownerId?._id || item.ownerId || "", // Map ownerId
         items: Array.isArray(item.items)
           ? item.items
           : JSON.parse(item.items || "[]"),
@@ -151,10 +123,12 @@ const NewListings = () => {
       setEditId(null);
       setFormData({
         categoryId: "",
-        subCategoryId: "", // Standardized
+        subCategoryId: "",
+        ownerId: "",
         title: "",
         address: "",
         phone: "",
+        youtubeVideo: "",
         twitter: "",
         facebook: "",
         linkedin: "",
@@ -170,6 +144,7 @@ const NewListings = () => {
 
   return (
     <div className="container-fluid py-4">
+      {/* Header and Table remains mostly same, added Video check in table */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="fw-bold text-dark m-0">Properties & Listings</h4>
         <CustomButton onClick={() => openModal()}>
@@ -186,92 +161,67 @@ const NewListings = () => {
               <tr>
                 <th className="ps-4">Preview</th>
                 <th>Title</th>
+                <th>Owner</th>
                 <th>Category</th>
-                <th>Subcategory</th>
                 <th>Address</th>
-                <th>Phone</th>
-                <th>Social Media</th>
-                <th>Items</th>
+                <th>Video</th>
                 <th className="text-end pe-4">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {pagination.paginatedData?.length > 0 ? (
-                pagination.paginatedData.map((item) => (
-                  <tr key={item._id}>
-                    <td className="ps-4">
-                      <img
-                        src={getImgURL(item.images?.[0])}
-                        alt=""
-                        className="rounded shadow-sm"
-                        style={{
-                          width: "50px",
-                          height: "40px",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </td>
-                    <td className="fw-bold text-dark">{item.title}</td>
-                    <td>
-                      <span className="badge bg-soft-primary text-primary">
-                        {item.categoryId?.name || "N/A"}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="text-muted">
-                        {item.subCategoryId?.subcategoryName || "—"}
-                      </span>
-                    </td>
-                    <td className="text-muted small">
-                      <div
-                        className="text-truncate"
-                        style={{ maxWidth: "150px" }}>
-                        <i className="bi bi-geo-alt me-1"></i> {item.address}
-                      </div>
-                    </td>
-                    <td className="small">{item.phone}</td>
-                    <td>{renderSocialIcons(item)}</td>
-                    <td>
-                      <span className="badge bg-light text-dark border">
-                        {Array.isArray(item.items) ? item.items.length : 0}{" "}
-                        Items
-                      </span>
-                    </td>
-                    <td className="text-end pe-4">
-                      <div className="d-flex justify-content-end gap-2">
-                        <button
-                          className="btn btn-sm btn-light border"
-                          onClick={() => openModal(item)}>
-                          <i className="bi bi-pencil text-primary"></i>
-                        </button>
-                        <button
-                          className="btn btn-sm btn-light border text-danger"
-                          onClick={() => deleteItem(item._id)}>
-                          <i className="bi bi-trash"></i>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="9" className="text-center py-5">
-                    {loading ? (
-                      <div className="spinner-border spinner-border-sm"></div>
+              {pagination.paginatedData?.map((item) => (
+                <tr key={item._id}>
+                  <td className="ps-4">
+                    <img
+                      src={getImgURL(item.images?.[0])}
+                      alt=""
+                      className="rounded shadow-sm"
+                      style={{
+                        width: "50px",
+                        height: "40px",
+                        objectFit: "cover",
+                      }}
+                    />
+                  </td>
+                  <td className="fw-bold text-dark">{item.title}</td>
+                  <td className="small text-muted">
+                    {item.ownerId?.fullName || "No Owner"}
+                  </td>
+                  <td>
+                    <span className="badge bg-soft-primary text-primary">
+                      {item.categoryId?.name}
+                    </span>
+                  </td>
+                  <td className="text-muted small">{item.address}</td>
+                  <td>
+                    {item.youtubeVideo ? (
+                      <i className="bi bi-play-circle-fill text-danger fs-5"></i>
                     ) : (
-                      "No Data Found"
+                      "—"
                     )}
                   </td>
+                  <td className="text-end pe-4">
+                    <div className="d-flex justify-content-end gap-2">
+                      <button
+                        className="btn btn-sm btn-light border"
+                        onClick={() => openModal(item)}>
+                        <i className="bi bi-pencil text-primary"></i>
+                      </button>
+                      <button
+                        className="btn btn-sm btn-light border text-danger"
+                        onClick={() => deleteItem(item._id)}>
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>
       </div>
 
-      <div className="mt-4">
-        <Pagination {...pagination} />
-      </div>
+      <Pagination {...pagination} />
 
       {showModal && (
         <div
@@ -290,7 +240,7 @@ const NewListings = () => {
               <form onSubmit={handleSave}>
                 <div
                   className="modal-body p-4"
-                  style={{ maxHeight: "70vh", overflowY: "auto" }}>
+                  style={{ maxHeight: "75vh", overflowY: "auto" }}>
                   <div className="row g-4">
                     <div className="col-12 col-lg-4">
                       <label className="small fw-bold text-muted mb-1 text-uppercase">
@@ -304,6 +254,23 @@ const NewListings = () => {
                         onChange={handleInputChange}
                         required
                       />
+
+                      <label className="small fw-bold text-muted mb-1 text-uppercase">
+                        Listing Owner
+                      </label>
+                      <select
+                        name="ownerId"
+                        className="form-select mb-3"
+                        value={formData.ownerId}
+                        onChange={handleInputChange}
+                        required>
+                        <option value="">Select Owner</option>
+                        {owners.map((o) => (
+                          <option key={o._id} value={o._id}>
+                            {o.fullName} ({o.email})
+                          </option>
+                        ))}
+                      </select>
 
                       <label className="small fw-bold text-muted mb-1 text-uppercase">
                         Category
@@ -326,7 +293,7 @@ const NewListings = () => {
                         Subcategory
                       </label>
                       <select
-                        name="subCategoryId" // Updated to capital C
+                        name="subCategoryId"
                         className="form-select mb-3"
                         value={formData.subCategoryId}
                         onChange={handleInputChange}
@@ -343,24 +310,21 @@ const NewListings = () => {
                           </option>
                         ))}
                       </select>
-
-                      <label className="small fw-bold text-muted mb-1 text-uppercase">
-                        Upload Photos
-                      </label>
-                      <input
-                        type="file"
-                        multiple
-                        className="form-control"
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            images: Array.from(e.target.files),
-                          })
-                        }
-                      />
                     </div>
 
                     <div className="col-12 col-lg-4 border-lg-start ps-lg-4">
+                      <label className="small fw-bold text-muted mb-1 text-uppercase">
+                        YouTube Video URL
+                      </label>
+                      <input
+                        type="text"
+                        name="youtubeVideo"
+                        placeholder="https://youtube.com/watch?v=..."
+                        className="form-control mb-3"
+                        value={formData.youtubeVideo}
+                        onChange={handleInputChange}
+                      />
+
                       <label className="small fw-bold text-muted mb-1 text-uppercase">
                         Location Address
                       </label>
@@ -372,32 +336,19 @@ const NewListings = () => {
                         onChange={handleInputChange}
                         required
                       />
+
                       <label className="small fw-bold text-muted mb-1 text-uppercase">
-                        Contact Details
+                        Contact Phone
                       </label>
-                      <div className="row g-2 mb-3">
-                        <div className="col-6">
-                          <input
-                            type="text"
-                            name="phone"
-                            placeholder="Phone"
-                            className="form-control"
-                            value={formData.phone}
-                            onChange={handleInputChange}
-                            required
-                          />
-                        </div>
-                        <div className="col-6">
-                          <input
-                            type="text"
-                            name="whatsappNo"
-                            placeholder="WhatsApp"
-                            className="form-control"
-                            value={formData.whatsappNo}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                      </div>
+                      <input
+                        type="text"
+                        name="phone"
+                        className="form-control mb-3"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        required
+                      />
+
                       <label className="small fw-bold text-muted mb-1 text-uppercase">
                         Social Media Links
                       </label>
@@ -408,6 +359,7 @@ const NewListings = () => {
                           "linkedin",
                           "youtube",
                           "twitter",
+                          "whatsappNo",
                         ].map((social) => (
                           <div className="col-6" key={social}>
                             <input
@@ -424,6 +376,21 @@ const NewListings = () => {
                     </div>
 
                     <div className="col-12 col-lg-4 border-lg-start ps-lg-4">
+                      <label className="small fw-bold text-muted mb-1 text-uppercase">
+                        Photos
+                      </label>
+                      <input
+                        type="file"
+                        multiple
+                        className="form-control mb-4"
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            images: Array.from(e.target.files),
+                          })
+                        }
+                      />
+
                       <div className="d-flex justify-content-between align-items-center mb-2">
                         <label className="small fw-bold text-muted text-uppercase">
                           Price List / Menu
@@ -444,7 +411,7 @@ const NewListings = () => {
                           <i className="bi bi-plus"></i>
                         </button>
                       </div>
-                      <div style={{ maxHeight: "250px", overflowY: "auto" }}>
+                      <div style={{ maxHeight: "200px", overflowY: "auto" }}>
                         {formData.items.map((item, index) => (
                           <div className="d-flex gap-1 mb-2" key={index}>
                             <input
