@@ -29,6 +29,12 @@ const Sidebar = ({ isOpen, onClose }) => {
 
     { name: "Pricing", path: "/admin/pricing", icon: "bi-currency-dollar" },
     {
+      name: "Inquiries",
+      path: "/admin/inquiries",
+      icon: "bi-envelope-paper-fill",
+    },
+
+    {
       name: "Testimonials",
       path: "/admin/testimonials",
       icon: "bi-chat-quote-fill",

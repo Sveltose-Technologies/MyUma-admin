@@ -38,6 +38,8 @@ export const useCrud = (apiMethods) => {
         res?.auths ||
         res?.owners ||
         res?.favorites ||
+        res?.inquiries || // 👈 Added for Inquiry list
+        res?.inquire ||
         res?.data; // res?.data will catch anything else
 
       let result = [];

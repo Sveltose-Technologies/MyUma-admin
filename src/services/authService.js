@@ -534,3 +534,30 @@ export const deleteFavoriteApi = async (id) => {
   const response = await api.delete(`/favorite/delete/${id}`);
   return response.data;
 };
+
+
+// Change these lines at the end of authService.js
+export const sendInquireApi = async (data) => {
+  const res = await api.post("/inquire/send", data);
+  return res.data;
+};
+
+export const getInquiriesApi = async () => {
+  const res = await api.get("/inquire/get-all");
+  return res.data;
+};
+
+export const updateInquireApi = async (id, data) => {
+  const res = await api.put(`/inquire/update/${id}`, data);
+  return res.data;
+};
+
+export const deleteInquireApi = async (id) => {
+  const res = await api.delete(`/inquire/delete/${id}`);
+  return res.data;
+};
+
+export const getInquiriesByOwnerApi = async (ownerId) => {
+  const res = await api.get(`/inquire/get-by-owner/${ownerId}`);
+  return res.data;
+};

@@ -1,6 +1,7 @@
 import { lazy } from "react";
 import UserManagement from "../pages/UserManagement";
 import OwnerList from "../pages/OwnerManagement";
+import InquireManagement from "../pages/InquireManagement";
 
 
 // Lazy loading all components
@@ -42,11 +43,16 @@ export const adminRoutes = [
     element: <UserManagement />,
     title: "User List",
   },
-{
-  path: "favorites", 
-  element: <Favorites />,
-  title: "Favorites",
-},
+  {
+    path: "inquiries",
+    element: <InquireManagement/>,
+    title: "Inquiries",
+  },
+  {
+    path: "favorites",
+    element: <Favorites />,
+    title: "Favorites",
+  },
   {
     path: "owner",
     element: <OwnerList />,
