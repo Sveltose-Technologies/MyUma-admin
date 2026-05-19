@@ -3,58 +3,97 @@ import { Link, useLocation } from "react-router-dom";
 
 const Sidebar = ({ isOpen, onClose }) => {
   const location = useLocation();
-  const menu = [
-    { name: "Dashboard", path: "/admin", icon: "bi-grid-1x2-fill" },
-    { name: "Home", path: "/admin/home", icon: "bi-house-fill" },
-    { name: "About Us", path: "/admin/about-us", icon: "bi-info-circle" },
-    { name: "User List", path: "/admin/user", icon: "bi-info-circle" },
-    { name: "owner List", path: "/admin/owner", icon: "bi-info-circle" },
+const menu = [
+  { name: "Dashboard", path: "/admin", icon: "bi-speedometer2" },
 
-    { name: "Categories", path: "/admin/categories", icon: "bi-tags" },
-    {
-      name: "Sub-Categories",
-      path: "/admin/sub-categories",
-      icon: "bi-list-nested", // Modern nested list icon
-    },
-    { name: "New Listings", path: "/admin/listings", icon: "bi-building-add" },
-    { name: "Blogs", path: "/admin/blogs", icon: "bi-newspaper" },
-    {
-      name: "Blog Categories",
-      path: "/admin/blog-categories",
-      icon: "bi-collection",
-    },
-    { name: "Book Now", path: "/admin/book-now", icon: "bi-calendar-check" },
-    { name: "Rating", path: "/admin/rating", icon: "bi-star-fill" },
-    { name: "Reviews", path: "/admin/reviews", icon: "bi-star-half" }, // Add this line
+  { name: "Home", path: "/admin/home", icon: "bi-house-door-fill" },
 
-    { name: "Pricing", path: "/admin/pricing", icon: "bi-currency-dollar" },
-    {
-      name: "Inquiries",
-      path: "/admin/inquiries",
-      icon: "bi-envelope-paper-fill",
-    },
+  { name: "About Us", path: "/admin/about-us", icon: "bi-info-circle-fill" },
 
-    {
-      name: "Testimonials",
-      path: "/admin/testimonials",
-      icon: "bi-chat-quote-fill",
-    },
-    { name: "Comments", path: "/admin/comments", icon: "bi-chat-dots" },
-    { name: "Favorites", path: "/admin/favorites", icon: "bi-heart-fill" },
-    { name: "ContactUs", path: "/admin/contact-us", icon: "bi-telephone" },
+  { name: "User List", path: "/admin/user", icon: "bi-people-fill" },
 
-    {
-      name: " Messages",
-      path: "/admin/messages",
-      icon: "bi-chat-dots",
-    },
-    {
-      name: "Footer Text",
-      path: "/admin/footer-text",
-      icon: "bi-file-text",
-    },
-  ];
+  { name: "Owner List", path: "/admin/owner", icon: "bi-person-badge-fill" },
 
+  { name: "Categories", path: "/admin/categories", icon: "bi-tags-fill" },
+
+  {
+    name: "Sub-Categories",
+    path: "/admin/sub-categories",
+    icon: "bi-diagram-3-fill",
+  },
+
+  {
+    name: "New Listings",
+    path: "/admin/listings",
+    icon: "bi-buildings-fill",
+  },
+
+  { name: "Blogs", path: "/admin/blogs", icon: "bi-journal-richtext" },
+
+  {
+    name: "Blog Categories",
+    path: "/admin/blog-categories",
+    icon: "bi-bookmarks-fill",
+  },
+
+  {
+    name: "Book Now",
+    path: "/admin/book-now",
+    icon: "bi-calendar2-check-fill",
+  },
+
+  { name: "Rating", path: "/admin/rating", icon: "bi-star-fill" },
+
+  { name: "Reviews", path: "/admin/reviews", icon: "bi-chat-square-text-fill" },
+
+  {
+    name: "Pricing",
+    path: "/admin/pricing",
+    icon: "bi-cash-stack",
+  },
+
+  // {
+  //   name: "Inquiries",
+  //   path: "/admin/inquiries",
+  //   icon: "bi-envelope-fill",
+  // },
+
+  {
+    name: "Testimonials",
+    path: "/admin/testimonials",
+    icon: "bi-chat-quote-fill",
+  },
+
+  {
+    name: "Comments",
+    path: "/admin/comments",
+    icon: "bi-chat-dots-fill",
+  },
+
+  {
+    name: "Favorites",
+    path: "/admin/favorites",
+    icon: "bi-heart-fill",
+  },
+
+  {
+    name: "ContactUs",
+    path: "/admin/contact-us",
+    icon: "bi-telephone-fill",
+  },
+
+  {
+    name: "Messages",
+    path: "/admin/messages",
+    icon: "bi-send-fill",
+  },
+
+  {
+    name: "Footer Text",
+    path: "/admin/footer-text",
+    icon: "bi-file-earmark-text-fill",
+  },
+];
   return (
     <>
       <style>{`.hide-scrollbar::-webkit-scrollbar { display: none; } .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }`}</style>

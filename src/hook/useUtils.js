@@ -1,5 +1,5 @@
-// export const BASE_URL = "https://node.myuma.net";
- export const BASE_URL = "https://nrislaw.rxchartsquare.com";
+export const BASE_URL = "https://node.myuma.net";
+
 export const useUtils = () => {
   const DEFAULT_IMAGE = "https://placehold.co/200x200?text=No+Image";
 

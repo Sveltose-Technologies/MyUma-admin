@@ -27,7 +27,7 @@ export const forgotPasswordApi = async (email) => {
 };
 
 export const resetPasswordApi = async (resetData) => {
-  const response = await api.put("/auth/reset-password", resetData); 
+  const response = await api.put("/auth/reset-password", resetData);
   return response.data;
 };
 
@@ -404,7 +404,7 @@ export const deleteRatingApi = async (id) => {
   return res.data;
 };
 export const getAllUsersApi = async () => {
-  const response = await api.get("/auth/get-all"); 
+  const response = await api.get("/auth/get-all");
   return response.data;
 };
 // --- Update this section at the bottom of your authService.js ---
@@ -427,14 +427,14 @@ export const testimonialMethods = {
   },
   delete: async (id) => {
     return await api.delete(`/testimonial/delete/${id}`);
-  }
+  },
 };
 
 // 12. SUB-CATEGORY APIS
 export const getAllSubCategoriesApi = async () => {
   const response = await api.get("/subcategory/get-all"); // Changed API to api
-  console.log("subcategory",response);
-  
+  console.log("subcategory", response);
+
   return response.data;
 };
 
@@ -470,7 +470,7 @@ export const reviewMethods = {
   delete: async (id) => {
     const res = await api.delete(`/review/delete/${id}`);
     return res.data;
-  }
+  },
 };
 
 // You might also need these to fill the dropdowns in the modal
@@ -503,7 +503,7 @@ export const adminChatMethods = {
   deleteMessage: async (messageId) => {
     const res = await api.delete(`/chat/delete/${messageId}`);
     return res.data;
-  }
+  },
 };
 
 // ==========================================
@@ -535,7 +535,6 @@ export const deleteFavoriteApi = async (id) => {
   return response.data;
 };
 
-
 // Change these lines at the end of authService.js
 export const sendInquireApi = async (data) => {
   const res = await api.post("/inquire/send", data);
@@ -560,4 +559,11 @@ export const deleteInquireApi = async (id) => {
 export const getInquiriesByOwnerApi = async (ownerId) => {
   const res = await api.get(`/inquire/get-by-owner/${ownerId}`);
   return res.data;
+};
+
+
+// To this:
+export const getAllOwnersAPI = async () => {
+  const response = await api.get("/auth/get-all-owner"); // ✅ Match your import name
+  return response.data;
 };
