@@ -52,11 +52,11 @@ const menu = [
     icon: "bi-cash-stack",
   },
 
-  // {
-  //   name: "Inquiries",
-  //   path: "/admin/inquiries",
-  //   icon: "bi-envelope-fill",
-  // },
+  {
+    name: "Inquiries",
+    path: "/admin/inquiries",
+    icon: "bi-envelope-fill",
+  },
 
   {
     name: "Testimonials",
