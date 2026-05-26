@@ -37,14 +37,14 @@ const menu = [
   },
 
   {
-    name: "Book Now",
-    path: "/admin/book-now",
+    name: "Bookmarks",
+    path: "/admin/bookmarks",
     icon: "bi-calendar2-check-fill",
   },
 
-  { name: "Rating", path: "/admin/rating", icon: "bi-star-fill" },
+  { name: "Reviews", path: "/admin/rating", icon: "bi-star-fill" },
 
-  { name: "Reviews", path: "/admin/reviews", icon: "bi-chat-square-text-fill" },
+  // { name: "Reviews", path: "/admin/reviews", icon: "bi-chat-square-text-fill" },
 
   {
     name: "Pricing",
@@ -52,11 +52,11 @@ const menu = [
     icon: "bi-cash-stack",
   },
 
-  // {
-  //   name: "Inquiries",
-  //   path: "/admin/inquiries",
-  //   icon: "bi-envelope-fill",
-  // },
+  {
+    name: "Inquiries",
+    path: "/admin/inquiries",
+    icon: "bi-envelope-fill",
+  },
 
   {
     name: "Testimonials",
@@ -65,8 +65,8 @@ const menu = [
   },
 
   {
-    name: "Comments",
-    path: "/admin/comments",
+    name: "User Blog Comments",
+    path: "/admin/blog-comments",
     icon: "bi-chat-dots-fill",
   },
 

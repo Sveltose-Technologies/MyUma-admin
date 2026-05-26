@@ -370,14 +370,12 @@ const Booknow = () => {
   return (
     <div className="container-fluid py-3 py-md-4">
       <div className="mb-4">
-        <h4 className="fw-bold text-navy">Booking Management</h4>
-        <p className="text-muted small">
-          Monitor and update existing booking records
-        </p>
+        <h4 className="fw-bold text-navy">Bookmarks Management</h4>
+
       </div>
 
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h5 className="fw-bold text-navy m-0">All Bookings Data</h5>
+        <h5 className="fw-bold text-navy m-0">All Bookmarks Data</h5>
         {/* Create Button Removed */}
       </div>
 

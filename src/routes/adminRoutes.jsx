@@ -15,7 +15,7 @@ const LegalDocs = lazy(()=>import("../pages/LegalDocs"));
 const AboutUs = lazy(()=>import("../pages/AboutUs"))
 const NewListings = lazy(() => import("../pages/NewListings"));
 const Pricing = lazy(() => import("../pages/Pricing"));
-const Comments = lazy(() => import("../pages/Comments"));
+const BlogComments = lazy(() => import("../pages/BlogComments"));
 const FooterText = lazy(() => import("../pages/FooterText"));
 const ContactUs = lazy(()=>import("../pages/ContactUs"))
 const Rating = lazy(() => import("../pages/Rating"));
@@ -45,7 +45,7 @@ export const adminRoutes = [
   },
   {
     path: "inquiries",
-    element: <InquireManagement/>,
+    element: <InquireManagement />,
     title: "Inquiries",
   },
   {
@@ -109,7 +109,7 @@ export const adminRoutes = [
     title: "Rating",
   },
   {
-    path: "book-now",
+    path: "bookmarks",
     element: <Booknow />,
     title: "Booknow",
   },
@@ -119,10 +119,11 @@ export const adminRoutes = [
     title: "Pricing Plans",
   },
   {
-    path: "comments",
-    element: <Comments />,
-    title: "User Comments",
+    path: "blog-comments",
+    element: <BlogComments />,
+    title: "User Blog Comments",
   },
+
   {
     path: "/admin/legal-docs",
     element: <LegalDocs />,

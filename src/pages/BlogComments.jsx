@@ -18,7 +18,7 @@ const COMMENT_METHODS = {
   delete: deleteCommentApi,
 };
 
-const Comments = () => {
+const BlogComments = () => {
   const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
     useCrud(COMMENT_METHODS);
   const pagination = usePagination(data, 10);
@@ -93,9 +93,9 @@ const Comments = () => {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h5 className="fw-bold text-navy m-0">All Comments</h5>
         {/* Swapped to CustomButton */}
-        <CustomButton onClick={() => openModal()}>
+        {/* <CustomButton onClick={() => openModal()}>
           <i className="bi bi-chat-left-text me-2"></i> Add Comment
-        </CustomButton>
+        </CustomButton> */}
       </div>
 
       <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
@@ -249,4 +249,4 @@ const Comments = () => {
   );
 };
 
-export default Comments;
+export default BlogComments;

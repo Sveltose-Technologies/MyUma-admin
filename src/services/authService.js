@@ -486,26 +486,39 @@ export const getAllOwnersApi = async () => {
   const response = await api.get("/auth/get-all-owner");
   return response.data;
 };
+// ==========================================
+// 12. CHAT MANAGEMENT APIS
+// ==========================================
 
-// Admin Chat Methods
-export const adminChatMethods = {
-  // Fetches history between an Admin (acting as user) and an Owner
-  getHistory: async (adminId, ownerId) => {
-    const res = await api.get(`/chat/get-by-user-owner/${adminId}/${ownerId}`);
-    return res.data;
-  },
-  // Sends a message
-  send: async (payload) => {
-    const res = await api.post("/chat/send", payload);
-    return res.data;
-  },
-  // Deletes a specific message by ID
-  deleteMessage: async (messageId) => {
-    const res = await api.delete(`/chat/delete/${messageId}`);
-    return res.data;
-  },
+// 1. Send Message
+export const sendMessageAPI = async (data) => {
+  const response = await api.post("/chat/send", data);
+  return response.data;
 };
 
+// 2. History: Admin & Owner (RENAMED TO MATCH COMPONENT)
+export const getChatAdminOwnerHistoryAPI = async (adminId, ownerId) => {
+  const response = await api.get(`/chat/get-by-admin-owner/${adminId}/${ownerId}`);
+  return response.data;
+};
+
+// 3. History: User & Owner
+export const getChatByUserOwnerAPI = async (userId, ownerId) => {
+  const response = await api.get(`/chat/get-by-user-owner/${userId}/${ownerId}`);
+  return response.data;
+};
+
+// 4. Delete Chat
+export const deleteChatMessageAPI = async (id) => {
+  const response = await api.delete(`/chat/delete/${id}`); // Fixed: lowercase 'api'
+  return response.data;
+};
+
+// 5. Get All Owners for Sidebar
+export const getAllOwnersAPI = async () => {
+  const response = await api.get("/auth/get-all-owner");
+  return response.data;
+};
 // ==========================================
 // 11. FAVORITE MANAGEMENT APIS
 // ==========================================
@@ -562,8 +575,3 @@ export const getInquiriesByOwnerApi = async (ownerId) => {
 };
 
 
-// To this:
-export const getAllOwnersAPI = async () => {
-  const response = await api.get("/auth/get-all-owner"); // ✅ Match your import name
-  return response.data;
-};
