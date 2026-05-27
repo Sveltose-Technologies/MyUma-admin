@@ -44,7 +44,6 @@ const menu = [
 
   { name: "Reviews", path: "/admin/rating", icon: "bi-star-fill" },
 
-  // { name: "Reviews", path: "/admin/reviews", icon: "bi-chat-square-text-fill" },
 
   {
     name: "Pricing",
