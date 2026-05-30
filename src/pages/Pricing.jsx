@@ -522,9 +522,14 @@ const Pricing = () => {
           <div
             className="modal fade show d-block"
             tabIndex="-1"
-            style={{ zIndex: 9999 }}>
+            style={{ zIndex: 9999, backgroundColor: "rgba(0,0,0,0.5)" }} 
+          >
             <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-              <div className="modal-content border-0 shadow-lg rounded-4">
+              <form
+                onSubmit={handleSave}
+                className="modal-content border-0 shadow-lg rounded-4"
+                style={{ maxHeight: "90vh" }} 
+              >
                 <div className="modal-header border-0 p-4 pb-0">
                   <h5 className="modal-title fw-bold">
                     {editId ? "Update Pricing Plan" : "Create New Pricing"}
@@ -535,116 +540,67 @@ const Pricing = () => {
                     onClick={() => setShowModal(false)}></button>
                 </div>
 
-                <form onSubmit={handleSave}>
-                  <div className="modal-body p-4">
-                    <div className="mb-4">
-                      <label className="form-label fw-bold small text-muted text-uppercase">
-                        Banner Heading
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control form-control-lg bg-light"
-                        placeholder="e.g. Choose Your Plan"
-                        value={formData.bannerText}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            bannerText: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
+                <div className="modal-body p-4">
+                  <div className="mb-4">
+                    <label className="form-label fw-bold small text-muted text-uppercase">
+                      Banner Heading
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control form-control-lg bg-light"
+                      placeholder="e.g. Choose Your Plan"
+                      value={formData.bannerText}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          bannerText: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
 
-                    <div className="row g-3">
-                      {formData.plans.map((plan, idx) => (
-                        <div className="col-12 col-lg-4" key={idx}>
-                          <div className="card h-100 border-0 bg-light p-3 rounded-3 shadow-sm">
-                            <h6
-                              className="fw-bold mb-3 border-bottom pb-2 text-primary text-uppercase"
-                              style={{
-                                fontSize: "13px",
-                                letterSpacing: "1px",
-                              }}>
-                              {plan.name} Plan
-                            </h6>
+                  <div className="row g-3">
+                    {formData.plans.map((plan, idx) => (
+                      <div className="col-12 col-lg-4" key={idx}>
+                        <div className="card h-100 border-0 bg-light p-3 rounded-3 shadow-sm">
+                          <h6
+                            className="fw-bold mb-3 border-bottom pb-2 text-primary text-uppercase"
+                            style={{
+                              fontSize: "13px",
+                              letterSpacing: "1px",
+                            }}>
+                            {plan.name} Plan
+                          </h6>
 
-                            <div className="row g-2 mb-3">
-                              <div className="col-6">
-                                <label className="form-label small fw-bold text-muted">
-                                  PRICE ($)
-                                </label>
-                                <input
-                                  type="number"
-                                  className="form-control border-0 shadow-sm"
-                                  value={plan.price}
-                                  onChange={(e) =>
-                                    handlePlanChange(
-                                      idx,
-                                      "price",
-                                      e.target.value,
-                                    )
-                                  }
-                                  required
-                                />
-                              </div>
-                              <div className="col-6">
-                                <label className="form-label small fw-bold text-muted">
-                                  DURATION COUNT
-                                </label>
-                                <input
-                                  type="number"
-                                  min="1"
-                                  className="form-control border-0 shadow-sm"
-                                  value={plan.durationCount}
-                                  onChange={(e) =>
-                                    handlePlanChange(
-                                      idx,
-                                      "durationCount",
-                                      e.target.value,
-                                    )
-                                  }
-                                  required
-                                />
-                              </div>
-                            </div>
-
-                            <div className="mb-3">
+                          <div className="row g-2 mb-3">
+                            <div className="col-6">
                               <label className="form-label small fw-bold text-muted">
-                                TIME UNIT (DAY/WEEK/MONTH/YEAR)
+                                PRICE ($)
                               </label>
-                              <select
-                                className="form-select border-0 shadow-sm"
-                                value={plan.duration}
-                                onChange={(e) =>
-                                  handlePlanChange(
-                                    idx,
-                                    "duration",
-                                    e.target.value,
-                                  )
-                                }
-                                required>
-                                {DURATION_OPTIONS.map((opt) => (
-                                  <option key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-
-                            <div>
-                              <label className="form-label small fw-bold text-muted">
-                                FEATURES (COMMA SEPARATED)
-                              </label>
-                              <textarea
+                              <input
+                                type="number"
                                 className="form-control border-0 shadow-sm"
-                                rows="3"
-                                placeholder="Feature 1, Feature 2..."
-                                value={plan.features}
+                                value={plan.price}
+                                onChange={(e) =>
+                                  handlePlanChange(idx, "price", e.target.value)
+                                }
+                                required
+                              />
+                            </div>
+                            <div className="col-6">
+                              <label className="form-label small fw-bold text-muted">
+                                DURATION COUNT
+                              </label>
+                              <input
+                                type="number"
+                                min="1"
+                                className="form-control border-0 shadow-sm"
+                                value={plan.durationCount}
                                 onChange={(e) =>
                                   handlePlanChange(
                                     idx,
-                                    "features",
+                                    "durationCount",
                                     e.target.value,
                                   )
                                 }
@@ -652,23 +608,67 @@ const Pricing = () => {
                               />
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
 
-                  <div className="modal-footer border-0 p-4 pt-0">
-                    <CustomButton
-                      variant="cancel"
-                      onClick={() => setShowModal(false)}>
-                      Cancel
-                    </CustomButton>
-                    <CustomButton type="submit" loading={loading}>
-                      Save Pricing Changes
-                    </CustomButton>
+                          <div className="mb-3">
+                            <label className="form-label small fw-bold text-muted">
+                              TIME UNIT (DAY/WEEK/MONTH/YEAR)
+                            </label>
+                            <select
+                              className="form-select border-0 shadow-sm"
+                              value={plan.duration}
+                              onChange={(e) =>
+                                handlePlanChange(
+                                  idx,
+                                  "duration",
+                                  e.target.value,
+                                )
+                              }
+                              required>
+                              {DURATION_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="form-label small fw-bold text-muted">
+                              FEATURES (COMMA SEPARATED)
+                            </label>
+                            <textarea
+                              className="form-control border-0 shadow-sm"
+                              rows="3"
+                              placeholder="Feature 1, Feature 2..."
+                              value={plan.features}
+                              onChange={(e) =>
+                                handlePlanChange(
+                                  idx,
+                                  "features",
+                                  e.target.value,
+                                )
+                              }
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </form>
-              </div>
+                </div>
+
+                <div className="modal-footer border-0 p-4 pt-0 bg-white sticky-bottom">
+                  <CustomButton
+                    variant="cancel"
+                    type="button" // Cancel बटन को सबमिट होने से बचाने के लिए
+                    onClick={() => setShowModal(false)}>
+                    Cancel
+                  </CustomButton>
+                  <CustomButton type="submit" loading={loading}>
+                    {editId ? "Update Pricing Changes" : "Save Pricing Changes"}
+                  </CustomButton>
+                </div>
+              </form>
             </div>
           </div>
           <div
