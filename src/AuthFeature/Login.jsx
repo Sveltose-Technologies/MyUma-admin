@@ -333,7 +333,7 @@ const Login = () => {
     const expiry = localStorage.getItem("sessionExpiry");
     if (expiry && Date.now() > parseInt(expiry)) {
       localStorage.clear();
-      toast.warn("Session expired. Please login again.");
+      toast.warn("Please login again.");
     }
     if (isAuthenticated) navigate("/admin");
   }, [isAuthenticated, navigate]);
