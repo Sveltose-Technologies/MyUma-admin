@@ -21,8 +21,18 @@ export const verifyOtpApi = async (otpData) => {
   return response.data;
 };
 
-export const forgotPasswordApi = async (email) => {
-  const response = await api.post("/auth/forgot-password", { email });
+// src/services/authService.js
+
+// 1. Fixed forgotPasswordApi to accept an object { email, role }
+export const forgotPasswordApi = async (data) => {
+  // data should be { email: "...", role: "admin" }
+  const response = await api.post("/auth/forgot-password", data);
+  return response.data;
+};
+
+// 2. Add Resend OTP for Forgot Password (Uses the same endpoint as Step 1)
+export const resendForgotPasswordOtpApi = async (email) => {
+  const response = await api.post("/auth/forgot-password", { email, role: "admin" });
   return response.data;
 };
 
@@ -35,7 +45,14 @@ export const getUserByIdApi = async (id) => {
   const response = await api.get(`/auth/get-by-id/${id}`);
   return response.data;
 };
+// src/services/authService.js
 
+// In authService.js
+export const resendOtpApi = async (email) => {
+  // Try adding 'admin' if the backend requires role verification
+  const response = await api.post("/auth/resend-otp", { email, role: 'admin' });
+  return response.data;
+};
 export const updateProfileApi = async (id, userData) => {
   try {
     console.log(">>> API CALL: updateProfileApi | ID:", id);
@@ -575,3 +592,13 @@ export const getInquiriesByOwnerApi = async (ownerId) => {
 };
 
 
+// Add this to your authService.js
+export const getProfileApi = async (id) => {
+  try {
+    // This calls your backend to get one specific user by ID
+    const response = await api.get(`/auth/${id}`); 
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};

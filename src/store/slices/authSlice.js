@@ -6,23 +6,28 @@ const initialState = {
   token: storage.getToken(),
   isAuthenticated: !!storage.getToken(),
   loading: false,
-  // 1. Added tempEmail to state to store email during password reset steps
-  tempEmail: null,
+  tempEmail: sessionStorage.getItem("temp_email") || null, // READ HERE
 };
-
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
+    // Inside authSlice.js
+
     setLogin: (state, action) => {
       const payload = action.payload;
-      const userData = payload?.auth || payload;
+      // Make sure we extract the user correctly based on your API structure
+      const userData = payload?.auth || payload?.user || payload;
       const token = payload?.token || payload?.auth?.token;
 
       if (userData && token) {
         state.user = userData;
         state.token = token;
         state.isAuthenticated = true;
+
+        // Debugging: Log this to see if profileImage exists here
+        console.log("User data at login:", userData);
+
         storage.setToken(token);
         storage.setUser(userData);
       }
@@ -41,16 +46,23 @@ const authSlice = createSlice({
       state.loading = action.payload;
     },
 
-    // 2. Add the setTempEmail reducer logic here
     setTempEmail: (state, action) => {
       state.tempEmail = action.payload;
+      // Save to session storage so it survives page refresh
+      if (action.payload) sessionStorage.setItem("temp_email", action.payload);
     },
 
+    // src/store/slices/authSlice.js
     updateUser: (state, action) => {
       if (state.user) {
+        // Merge existing user data with new data (like the profile image)
         const updatedUser = { ...state.user, ...action.payload };
         state.user = updatedUser;
-        storage.setUser(updatedUser);
+        storage.setUser(updatedUser); // Save to LocalStorage
+      } else {
+        // If for some reason user was null, set it
+        state.user = action.payload;
+        storage.setUser(action.payload);
       }
     },
   },

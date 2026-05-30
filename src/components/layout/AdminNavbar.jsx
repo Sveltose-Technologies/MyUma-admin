@@ -1,29 +1,44 @@
+// src/components/AdminNavbar.jsx
+
 import React, { useState, useRef, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux"; 
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import { setLogout } from "../../store/slices/authSlice";
-import { useUtils } from "../../hook/useUtils"; 
+import { setLogout, updateUser } from "../../store/slices/authSlice"; 
+import { useUtils } from "../../hook/useUtils";
+// SAHI IMPORT: getProfileApi ko hata kar getUserByIdApi likhein
+import { getUserByIdApi } from "../../services/authService"; 
 
 const AdminNavbar = ({ onToggle }) => {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef(null);
-
-  // Get dynamic user data from Redux
   const { user } = useSelector((state) => state.auth);
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { getImgURL } = useUtils(); // Initialize image utility
+  const { getImgURL } = useUtils();
+  const dropdownRef = useRef(null);
+  const [showDropdown, setShowDropdown] = useState(false);
 
+  // --- LOGOUT KE BAAD IMAGE WAPAS LANE KE LIYE YE LOGIC ---
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setShowDropdown(false);
+    const fetchFullProfile = async () => {
+      // Agar user login hai par profileImage missing hai
+      if (user && !user.profileImage) {
+        try {
+          const userId = user._id || user.id;
+          // SAHI FUNCTION CALL: Jo /auth/get-by-id/:id call karega
+          const response = await getUserByIdApi(userId);
+
+          if (response?.auth) {
+            // Redux aur LocalStorage ko update karein
+            dispatch(updateUser(response.auth));
+            console.log("Profile Refreshed Successfully");
+          }
+        } catch (error) {
+          console.error("Failed to refresh profile image:", error);
+        }
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+
+    fetchFullProfile();
+  }, [user, dispatch]);
 
   const handleLogout = () => {
     dispatch(setLogout());
@@ -37,7 +52,6 @@ const AdminNavbar = ({ onToggle }) => {
   return (
     <div className="top-navbar">
       <div className="d-flex align-items-center">
-        
         <button
           className="btn btn-gold d-md-none me-3  shadow-sm"
           onClick={onToggle}>
@@ -83,8 +97,6 @@ const AdminNavbar = ({ onToggle }) => {
             ) : (
               <span>{avatarLetter}</span>
             )}
-
-          
           </div>
         </div>
 
