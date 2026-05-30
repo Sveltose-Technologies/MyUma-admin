@@ -17,6 +17,7 @@ export const useCrud = (apiMethods) => {
 
       const rawData =
         res?.categories ||
+         res?.payments || 
         res?.subcategories ||
         res?.testimonials || // 👈 Added this for Testimonials
         res?.homeBanner ||

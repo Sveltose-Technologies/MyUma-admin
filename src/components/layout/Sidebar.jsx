@@ -50,7 +50,11 @@ const menu = [
     path: "/admin/pricing",
     icon: "bi-cash-stack",
   },
-
+{
+  name: "Payments",
+  path: "/admin/payments",
+  icon: "bi-credit-card-fill"
+},
   {
     name: "Inquiries",
     path: "/admin/inquiries",

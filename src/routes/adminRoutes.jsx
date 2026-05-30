@@ -26,6 +26,7 @@ const Reviews = lazy(() => import("../pages/Reviews"));
 const Messages = lazy(() => import("../pages/Messages"));
 // Make sure this matches the filename exactly!
 const Favorites = lazy(() => import("../pages/Favorites"));
+const Payments = lazy(() => import("../pages/Payments"));
 
 export const adminRoutes = [
   {
@@ -117,6 +118,11 @@ export const adminRoutes = [
     path: "pricing",
     element: <Pricing />,
     title: "Pricing Plans",
+  },
+  {
+    path: "payments",
+    element: <Payments/>,
+    title: "Subscriptions & Payments",
   },
   {
     path: "blog-comments",

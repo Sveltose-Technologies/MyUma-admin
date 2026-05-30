@@ -286,7 +286,31 @@ export const deletePricingApi = async (id) => {
   const res = await api.delete(`/pricing/delete/${id}`);
   return res.data;
 };
+// ==========================================
+// PAYMENT MANAGEMENT APIS
+// ==========================================
 
+// 1. Get All Payments
+export const getAllPaymentsAPI = async () => {
+  try {
+    const response = await api.get("/payment/get-all");
+    return response.data;
+  } catch (error) {
+    console.error("Error in getAllPaymentsAPI:", error);
+    throw error;
+  }
+};
+
+// 2. Delete Payment Record
+export const deletePaymentAPI = async (id) => {
+  try {
+    const response = await api.delete(`/payment/delete/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error in deletePaymentAPI:", error);
+    throw error;
+  }
+};
 export const getAllCommentsApi = async () => {
   const res = await api.get("/comment/get-all");
   console.log("COMMENT GET ALL RESPONSE:", res.data);
