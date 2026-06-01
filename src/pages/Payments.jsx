@@ -2,7 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useCrud } from "../hook/useCrud";
 import { usePagination } from "../hook/usePagination";
 import Pagination from "../components/common/Pagination";
-import { getAllPaymentsAPI, getAllUsersApi } from "../services/authService";
+import {
+  getAllPaymentsAPI,
+  getAllUsersApi,
+  getAllPricingApi,
+} from "../services/authService";
+import { User, Calendar, Clock, CreditCard, DollarSign } from "lucide-react";
 
 const PAYMENT_METHODS = {
   getAll: getAllPaymentsAPI,
@@ -11,39 +16,69 @@ const PAYMENT_METHODS = {
 const Payments = () => {
   const { data, loading, fetchAll } = useCrud(PAYMENT_METHODS);
   const [users, setUsers] = useState([]);
+  const [plans, setPlans] = useState([]);
 
+  // Extract payment array from data
   const paymentList = data || [];
   const pagination = usePagination(paymentList, 10);
 
   useEffect(() => {
     fetchAll();
-    fetchUsers();
+    fetchSelectionData();
   }, [fetchAll]);
 
-  const fetchUsers = async () => {
+  const fetchSelectionData = async () => {
     try {
-      const res = await getAllUsersApi();
-      // Backend ke hisaab se users ya auths array set karein
-      setUsers(res?.auths || res?.users || []);
+      const [userRes, planRes] = await Promise.all([
+        getAllUsersApi(),
+        getAllPricingApi(),
+      ]);
+      // Key mapping based on your backend structure
+      setUsers(userRes?.auths || userRes?.users || []);
+      setPlans(planRes?.data?.[0]?.Plan || []);
     } catch (err) {
-      console.error("Failed to fetch users", err);
+      console.error("Selection Data Fetch Error:", err);
     }
   };
 
-  // HELPER: ID se User ka Name dhoondhne ke liye
-  const getUserName = (paymentItem) => {
-    // 1. Agar backend ne populate karke diya ho (Object)
-    if (paymentItem.userId?.fullName) return paymentItem.userId.fullName;
+  /**
+   * Logic: Map userId to User fullName
+   */
+  const getOwnerName = (payment) => {
+    // 1. Check if populated
+    if (payment.userId?.fullName) return payment.userId.fullName;
 
-    // 2. Agar payment object mein seedha userName ho
-    if (paymentItem.userName) return paymentItem.userName;
+    // 2. Search in user list state
+    const targetId = payment.userId?._id || payment.userId;
+    const foundUser = users.find((u) => String(u._id) === String(targetId));
 
-    // 3. User list (ID) se match karke nikalein
-    const idToSearch = paymentItem.userId?._id || paymentItem.userId;
-    const found = users.find((u) => String(u._id) === String(idToSearch));
+    if (foundUser) return foundUser.fullName;
 
-    // Agar mil jaye toh Full Name, warna Email ka pehla part, warna Unknown
-    return found ? found.fullName : "Unknown User";
+    // 3. Fallback: Trim Email
+    const email = payment.email || payment.userId?.email;
+    return email ? email.split("@")[0] : "Unknown Owner";
+  };
+
+  /**
+   * Logic: Calculate Expiry Date based on Plan duration
+   */
+  const calculateExpiry = (payment) => {
+    if (payment.subscriptionEndDate) return payment.subscriptionEndDate;
+
+    const planMeta = plans.find((p) => p.name === payment.planName);
+    if (!planMeta) return payment.createdAt;
+
+    const start = new Date(payment.createdAt);
+    const expiry = new Date(start);
+    const count = planMeta.durationCount || 1;
+    const unit = planMeta.duration?.toLowerCase();
+
+    if (unit === "day") expiry.setDate(expiry.getDate() + count);
+    else if (unit === "week") expiry.setDate(expiry.getDate() + count * 7);
+    else if (unit === "month") expiry.setMonth(expiry.getMonth() + count);
+    else if (unit === "year") expiry.setFullYear(expiry.getFullYear() + count);
+
+    return expiry;
   };
 
   const formatDate = (date) =>
@@ -55,94 +90,106 @@ const Payments = () => {
         })
       : "N/A";
 
-  const getStatusBadge = (status) => {
+  const getStatusStyle = (status) => {
     const s = status?.toLowerCase();
     if (s === "success")
-      return (
-        <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-2 rounded-pill">
-          SUCCESS
-        </span>
-      );
+      return "bg-success-subtle text-success border-success-subtle";
     if (s === "failed")
-      return (
-        <span className="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill">
-          FAILED
-        </span>
-      );
-    return (
-      <span className="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2 rounded-pill">
-        PENDING
-      </span>
-    );
+      return "bg-danger-subtle text-danger border-danger-subtle";
+    return "bg-warning-subtle text-warning border-warning-subtle";
   };
 
   return (
-    <div className="container-fluid py-4">
+    <div className="container-fluid py-4 bg-light min-vh-100 text-start">
       <div className="mb-4">
-        <h4 className="fw-bold text-navy">Payment Management</h4>
+        <h4 className="fw-bold text-navy">Owner Memberships</h4>
         <p className="text-muted small">
-          Monitor all transactions and active user subscriptions.
+          Manage all professional owner subscriptions and payment statuses.
         </p>
       </div>
 
       <div className="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0 text-nowrap">
-            <thead className="bg-light">
+            <thead className="bg-white border-bottom">
               <tr className="small text-uppercase fw-bold text-muted">
                 <th className="px-4 py-3">#</th>
-                <th>User Details</th>
+                <th>Owner Identity</th>
                 <th>Plan Name</th>
                 <th>Amount</th>
-                <th>Status</th>
+                <th>Payment Status</th>
+                <th>Membership Start</th>
                 <th>Expiry Date</th>
               </tr>
             </thead>
             <tbody>
               {loading && paymentList.length === 0 ? (
                 <tr>
-                  <td colSpan="6" className="text-center py-5">
-                    <div className="spinner-border text-gold"></div>
+                  <td colSpan="7" className="text-center py-5">
+                    <div className="spinner-border text-warning"></div>
                   </td>
                 </tr>
               ) : (
-                pagination.paginatedData.map((item, i) => (
-                  <tr key={item._id}>
-                    <td className="px-4 text-muted">
-                      {(pagination.currentPage - 1) * 10 + (i + 1)}
-                    </td>
-                    <td>
-                      <div className="d-flex flex-column">
-                        {/* NAME SECTION */}
-                        <span
-                          className="fw-bold text-navy"
-                          style={{ fontSize: "14px" }}>
-                          {getUserName(item)}
+                pagination.paginatedData.map((item, i) => {
+                  const expiry = calculateExpiry(item);
+                  const isExpired =
+                    new Date(expiry) < new Date() && item.status === "success";
+
+                  return (
+                    <tr key={item._id}>
+                      <td className="px-4 text-muted small">
+                        {(pagination.currentPage - 1) * 10 + (i + 1)}
+                      </td>
+                      <td>
+                        <div className="d-flex align-items-center gap-2">
+                          <div className="p-2 bg-light rounded-circle text-navy">
+                            <User size={16} />
+                          </div>
+                          <div className="d-flex flex-column">
+                            <span className="fw-bold text-navy text-capitalize small">
+                              {getOwnerName(item)}
+                            </span>
+                            <span
+                              className="text-muted"
+                              style={{ fontSize: "10px" }}>
+                              {item.email || item.userId?.email}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className="badge bg-light text-black border fw-semibold small">
+                          {item.planName}
                         </span>
-                        {/* EMAIL SECTION (CHHOTA FONT) */}
-                        <span
-                          className="text-muted"
-                          style={{ fontSize: "11px" }}>
-                          {item.email || item.userId?.email}
+                      </td>
+                      <td>
+                        <span className="fw-bold text-dark small">
+                          ${item.amount}
                         </span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="fw-semibold">
-                        {item.planName || "Plan"}
-                      </span>
-                    </td>
-                    <td>
-                      <span className="fw-bold text-dark">
-                        ${item.amount || "0"}
-                      </span>
-                    </td>
-                    <td>{getStatusBadge(item.status)}</td>
-                    <td className="text-muted small">
-                      {formatDate(item.subscriptionEndDate || item.updatedAt)}
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td>
+                        <span
+                          className={`badge rounded-pill px-3 py-1 border small ${getStatusStyle(item.status)}`}>
+                          {item.status?.toUpperCase()}
+                        </span>
+                      </td>
+                      <td className="text-muted small">
+                        {formatDate(item.createdAt)}
+                      </td>
+                      <td>
+                        <span
+                          className={`fw-bold small ${isExpired ? "text-danger" : "text-navy"}`}>
+                          {formatDate(expiry)}
+                          {isExpired && (
+                            <span className="ms-1" style={{ fontSize: "9px" }}>
+                              (EXPIRED)
+                            </span>
+                          )}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

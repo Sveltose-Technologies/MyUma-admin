@@ -44,17 +44,16 @@ const menu = [
 
   { name: "Reviews", path: "/admin/rating", icon: "bi-star-fill" },
 
-
   {
     name: "Pricing",
     path: "/admin/pricing",
     icon: "bi-cash-stack",
   },
-{
-  name: "Payments",
-  path: "/admin/payments",
-  icon: "bi-credit-card-fill"
-},
+  {
+    name: "Memberships ",
+    path: "/admin/payments",
+    icon: "bi-credit-card-fill",
+  },
   {
     name: "Inquiries",
     path: "/admin/inquiries",

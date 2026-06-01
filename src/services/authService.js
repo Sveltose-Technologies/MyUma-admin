@@ -519,6 +519,15 @@ export const getAllItemsApi = async () => {
   const res = await api.get("/newListing/get-all");
   return res.data;
 };
+export const getPlansAPI = async () => {
+  try {
+    const response = await API.get("/pricing/get-all");
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching plans:", error);
+    throw error;
+  }
+};
 
 // services/authService.js
 
