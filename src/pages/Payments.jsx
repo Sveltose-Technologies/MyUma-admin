@@ -44,19 +44,18 @@ const Payments = () => {
   /**
    * Logic: Map userId to User fullName
    */
+  // getOwnerName helper के अंदर
   const getOwnerName = (payment) => {
     // 1. Check if populated
-    if (payment.userId?.fullName) return payment.userId.fullName;
+    if (payment.ownerId?.fullName) return payment.ownerId.fullName;
 
-    // 2. Search in user list state
-    const targetId = payment.userId?._id || payment.userId;
+    // 2. Match with user list (अब ownerId यूज़ करें)
+    const targetId = payment.ownerId?._id || payment.ownerId;
     const foundUser = users.find((u) => String(u._id) === String(targetId));
 
-    if (foundUser) return foundUser.fullName;
-
-    // 3. Fallback: Trim Email
-    const email = payment.email || payment.userId?.email;
-    return email ? email.split("@")[0] : "Unknown Owner";
+    return foundUser
+      ? foundUser.fullName
+      : payment.email?.split("@")[0] || "Owner";
   };
 
   /**
@@ -201,6 +200,6 @@ const Payments = () => {
       </div>
     </div>
   );
-};
+};;
 
 export default Payments;
