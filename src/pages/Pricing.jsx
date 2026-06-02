@@ -1,1109 +1,9 @@
-// // import React, { useEffect, useState } from "react";
-// // import { useCrud } from "../hook/useCrud";
-// // import { usePagination } from "../hook/usePagination";
-// // import Pagination from "../components/common/Pagination";
-// // import CustomButton from "../components/common/CustomButton";
-// // import {
-// //   getAllPricingApi,
-// //   addPricingApi,
-// //   updatePricingApi,
-// //   deletePricingApi,
-// // } from "../services/authService";
-
-// // const PRICING_METHODS = {
-// //   getAll: getAllPricingApi,
-// //   add: addPricingApi,
-// //   update: updatePricingApi,
-// //   delete: deletePricingApi,
-// // };
-
-// // const Pricing = () => {
-// //   const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
-// //     useCrud(PRICING_METHODS);
-// //   const pagination = usePagination(data, 5);
-
-// //   const [showModal, setShowModal] = useState(false);
-// //   const [editId, setEditId] = useState(null);
-
-// //   const [formData, setFormData] = useState({
-// //     bannerText: "",
-// //     plans: [
-// //       { name: "Basic", price: "", features: "" },
-// //       { name: "Marketplace", price: "", features: "" },
-// //       { name: "Enterprise", price: "", features: "" },
-// //     ],
-// //   });
-
-// //   useEffect(() => {
-// //     fetchAll();
-// //   }, [fetchAll]);
-
-// //   const handlePlanChange = (index, field, value) => {
-// //     setFormData((prev) => {
-// //       const updatedPlans = [...prev.plans];
-// //       updatedPlans[index] = { ...updatedPlans[index], [field]: value };
-// //       return { ...prev, plans: updatedPlans };
-// //     });
-// //   };
-
-// //   const handleSave = async (e) => {
-// //     e.preventDefault();
-// //     const payload = {
-// //       bannerText: formData.bannerText,
-// //       Plan: formData.plans.map((p) => ({
-// //         ...p,
-// //         features:
-// //           typeof p.features === "string"
-// //             ? p.features
-// //                 .split(",")
-// //                 .map((f) => f.trim())
-// //                 .filter((f) => f !== "")
-// //             : p.features,
-// //       })),
-// //     };
-// //     const success = editId
-// //       ? await updateItem(editId, payload)
-// //       : await addItem(payload);
-// //     if (success) setShowModal(false);
-// //   };
-
-// //   const openModal = (item = null) => {
-// //     if (item) {
-// //       setEditId(item._id);
-// //       setFormData({
-// //         bannerText: item.bannerText || "",
-// //         plans: item.Plan.map((p) => ({
-// //           name: p.name,
-// //           price: p.price,
-// //           features: Array.isArray(p.features)
-// //             ? p.features.join(", ")
-// //             : p.features,
-// //         })),
-// //       });
-// //     } else {
-// //       setEditId(null);
-// //       setFormData({
-// //         bannerText: "",
-// //         plans: [
-// //           { name: "Basic", price: "", features: "" },
-// //           { name: "Marketplace", price: "", features: "" },
-// //           { name: "Enterprise", price: "", features: "" },
-// //         ],
-// //       });
-// //     }
-// //     setShowModal(true);
-// //   };
-
-// //   return (
-// //     <div className="container-fluid p-3 p-md-4">
-// //       {/* Header Section */}
-// //       <div className="row align-items-center mb-4 gy-3">
-// //         <div className="col-12 col-md-8 text-center text-md-start">
-// //           <h3 className="fw-bold text-dark mb-1">Pricing Management</h3>
-// //           <p className="text-muted mb-0 small">
-// //             Manage your business plans and banner headings
-// //           </p>
-// //         </div>
-// //         <div className="col-12 col-md-4 text-center text-md-end">
-// //           <CustomButton
-// //             variant="gold"
-// //             className="w-100 w-md-auto shadow-sm"
-// //             onClick={() => openModal()}>
-// //             <i className="bi bi-plus-lg me-2"></i> Add Pricing
-// //           </CustomButton>
-// //         </div>
-// //       </div>
-
-// //       {/* Table Section */}
-// //       <div className="card border-0 shadow-sm rounded-3">
-// //         <div className="table-responsive">
-// //           <table className="table table-hover align-middle mb-0">
-// //             <thead className="table-light">
-// //               <tr>
-// //                 <th className="p-3">Banner Text</th>
-// //                 <th className="text-center p-3">Basic</th>
-// //                 <th className="text-center p-3">Marketplace</th>
-// //                 <th className="text-center p-3">Enterprise</th>
-// //                 <th className="text-end p-3">Actions</th>
-// //               </tr>
-// //             </thead>
-// //             <tbody>
-// //               {loading && data.length === 0 ? (
-// //                 <tr>
-// //                   <td colSpan="5" className="text-center py-5">
-// //                     <div className="spinner-border text-warning"></div>
-// //                   </td>
-// //                 </tr>
-// //               ) : (
-// //                 pagination.paginatedData.map((item) => (
-// //                   <tr key={item._id}>
-// //                     <td className="p-3 fw-semibold">{item.bannerText}</td>
-// //                     <td className="text-center">
-// //                       <span className="badge bg-light text-dark border p-2">
-// //                         ${item.Plan?.[0]?.price || "0"}
-// //                       </span>
-// //                     </td>
-// //                     <td className="text-center">
-// //                       <span className="badge bg-light text-dark border p-2">
-// //                         ${item.Plan?.[1]?.price || "0"}
-// //                       </span>
-// //                     </td>
-// //                     <td className="text-center">
-// //                       <span className="badge bg-light text-dark border p-2">
-// //                         ${item.Plan?.[2]?.price || "0"}
-// //                       </span>
-// //                     </td>
-// //                     <td className="text-end p-3 text-nowrap">
-// //                       {/* Using 'info' instead of 'primary' */}
-// //                       <button
-// //                         className="btn btn-sm btn-outline-info me-2 shadow-none"
-// //                         onClick={() => openModal(item)}>
-// //                         <i className="bi bi-pencil-square"></i>
-// //                       </button>
-// //                       <button
-// //                         className="btn btn-sm btn-outline-danger shadow-none"
-// //                         onClick={() => deleteItem(item._id)}>
-// //                         <i className="bi bi-trash3"></i>
-// //                       </button>
-// //                     </td>
-// //                   </tr>
-// //                 ))
-// //               )}
-// //             </tbody>
-// //           </table>
-// //         </div>
-// //       </div>
-
-// //       <div className="mt-4">
-// //         <Pagination {...pagination} />
-// //       </div>
-
-// //       {/* --- MODAL SECTION --- */}
-// //       {showModal && (
-// //         <>
-// //           {/* High z-index ensures it sits above the sidebar */}
-// //           <div
-// //             className="modal fade show d-block"
-// //             tabIndex="-1"
-// //             style={{ zIndex: 9999 }}>
-// //             <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-// //               <div className="modal-content border-0 shadow-lg rounded-4">
-// //                 <div className="modal-header border-0 p-4 pb-0">
-// //                   <h5 className="modal-title fw-bold text-dark">
-// //                     {editId ? "Update Pricing Details" : "Create New Pricing"}
-// //                   </h5>
-// //                   <button
-// //                     type="button"
-// //                     className="btn-close shadow-none"
-// //                     onClick={() => setShowModal(false)}></button>
-// //                 </div>
-
-// //                 <form onSubmit={handleSave}>
-// //                   <div className="modal-body p-4">
-// //                     <div className="mb-4">
-// //                       <label className="form-label fw-bold small text-muted text-uppercase">
-// //                         Banner Heading Text
-// //                       </label>
-// //                       <input
-// //                         type="text"
-// //                         className="form-control form-control-lg bg-light border shadow-none"
-// //                         placeholder="e.g. Choose Your Business Impact"
-// //                         value={formData.bannerText}
-// //                         onChange={(e) =>
-// //                           setFormData({
-// //                             ...formData,
-// //                             bannerText: e.target.value,
-// //                           })
-// //                         }
-// //                         required
-// //                       />
-// //                     </div>
-
-// //                     <div className="row g-3">
-// //                       {formData.plans.map((plan, idx) => (
-// //                         <div className="col-12 col-lg-4" key={idx}>
-// //                           <div className="card h-100 border-0 bg-light p-3 rounded-3 shadow-sm">
-// //                             <div className="d-flex align-items-center mb-3">
-// //                               <span className="badge bg-dark rounded-circle me-2">
-// //                                 {idx + 1}
-// //                               </span>
-// //                               <h6 className="fw-bold m-0">{plan.name}</h6>
-// //                             </div>
-
-// //                             <div className="mb-3">
-// //                               <label className="form-label small fw-bold text-muted">
-// //                                 PRICE ($)
-// //                               </label>
-// //                               <input
-// //                                 type="text"
-// //                                 className="form-control border-0 shadow-sm"
-// //                                 value={plan.price}
-// //                                 onChange={(e) =>
-// //                                   handlePlanChange(idx, "price", e.target.value)
-// //                                 }
-// //                                 required
-// //                               />
-// //                             </div>
-
-// //                             <div className="mb-0">
-// //                               <label className="form-label small fw-bold text-muted">
-// //                                 FEATURES (COMMA SEPARATED)
-// //                               </label>
-// //                               <textarea
-// //                                 className="form-control border-0 shadow-sm"
-// //                                 rows="4"
-// //                                 placeholder="Feature 1, Feature 2..."
-// //                                 value={plan.features}
-// //                                 onChange={(e) =>
-// //                                   handlePlanChange(
-// //                                     idx,
-// //                                     "features",
-// //                                     e.target.value,
-// //                                   )
-// //                                 }
-// //                                 required
-// //                               />
-// //                             </div>
-// //                           </div>
-// //                         </div>
-// //                       ))}
-// //                     </div>
-// //                   </div>
-
-// //                   <div className="modal-footer border-0 p-4 pt-0">
-// //                     <div className="row w-100 g-2">
-// //                       <div className="col-12 col-sm-6 order-2 order-sm-1 text-center text-sm-start">
-// //                         <CustomButton
-// //                           variant="cancel"
-// //                           className="w-100"
-// //                           onClick={() => setShowModal(false)}>
-// //                           Cancel
-// //                         </CustomButton>
-// //                       </div>
-// //                       <div className="col-12 col-sm-6 order-1 order-sm-2 text-center text-sm-end">
-// //                         <CustomButton
-// //                           type="submit"
-// //                           loading={loading}
-// //                           className="w-100">
-// //                           Save Changes
-// //                         </CustomButton>
-// //                       </div>
-// //                     </div>
-// //                   </div>
-// //                 </form>
-// //               </div>
-// //             </div>
-// //           </div>
-
-// //           <div
-// //             className="modal-backdrop fade show"
-// //             style={{ zIndex: 9998 }}></div>
-// //         </>
-// //       )}
-// //     </div>
-// //   );
-// // };
-
-// // export default Pricing;
-
-// import React, { useEffect, useState } from "react";
-// import { useCrud } from "../hook/useCrud";
-// import { usePagination } from "../hook/usePagination";
-// import Pagination from "../components/common/Pagination";
-// import CustomButton from "../components/common/CustomButton";
-// import {
-//   getAllPricingApi,
-//   addPricingApi,
-//   updatePricingApi,
-//   deletePricingApi,
-// } from "../services/authService";
-
-// const PRICING_METHODS = {
-//   getAll: getAllPricingApi,
-//   add: addPricingApi,
-//   update: updatePricingApi,
-//   delete: deletePricingApi,
-// };
-
-// // Define available durations as a constant for easy management
-// const DURATION_OPTIONS = [
-//   { value: "day", label: "Day(s)" },
-//   { value: "week", label: "Week(s)" },
-//   { value: "month", label: "Month(s)" },
-//   { value: "year", label: "Year(s)" },
-// ];
-
-// const Pricing = () => {
-//   const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
-//     useCrud(PRICING_METHODS);
-//   const pagination = usePagination(data, 5);
-
-//   const [showModal, setShowModal] = useState(false);
-//   const [editId, setEditId] = useState(null);
-
-//   const initialPlanState = [
-//     {
-//       name: "Basic",
-//       price: "",
-//       features: "",
-//       duration: "month",
-//       durationCount: 1,
-//     },
-//     {
-//       name: "Marketplace",
-//       price: "",
-//       features: "",
-//       duration: "month",
-//       durationCount: 1,
-//     },
-//     {
-//       name: "Enterprise",
-//       price: "",
-//       features: "",
-//       duration: "month",
-//       durationCount: 1,
-//     },
-//   ];
-
-//   const [formData, setFormData] = useState({
-//     bannerText: "",
-//     plans: initialPlanState,
-//   });
-
-//   useEffect(() => {
-//     fetchAll();
-//   }, [fetchAll]);
-
-//   // FIXED: Format duration to show "1 Day", "3 Weeks", "12 Months", etc.
-//   const formatDuration = (count, type) => {
-//     if (!count || !type) return "N/A";
-//     const unit = parseInt(count) !== 1 ? `${type}s` : type;
-//     return `${count} ${unit.charAt(0).toUpperCase() + unit.slice(1)}`;
-//   };
-
-//   const handlePlanChange = (index, field, value) => {
-//     setFormData((prev) => {
-//       const updatedPlans = [...prev.plans];
-//       updatedPlans[index] = { ...updatedPlans[index], [field]: value };
-//       return { ...prev, plans: updatedPlans };
-//     });
-//   };
-
-//   const handleSave = async (e) => {
-//     e.preventDefault();
-//     const payload = {
-//       bannerText: formData.bannerText,
-//       Plan: formData.plans.map((p) => ({
-//         ...p,
-//         price: Number(p.price),
-//         durationCount: Number(p.durationCount),
-//         features:
-//           typeof p.features === "string"
-//             ? p.features
-//                 .split(",")
-//                 .map((f) => f.trim())
-//                 .filter((f) => f !== "")
-//             : p.features,
-//       })),
-//     };
-
-//     const success = editId
-//       ? await updateItem(editId, payload)
-//       : await addItem(payload);
-//     if (success) setShowModal(false);
-//   };
-
-//   const openModal = (item = null) => {
-//     if (item) {
-//       setEditId(item._id);
-//       setFormData({
-//         bannerText: item.bannerText || "",
-//         plans: (item.Plan || []).map((p) => ({
-//           name: p.name,
-//           price: p.price,
-//           duration: p.duration || "month",
-//           durationCount: p.durationCount || 1,
-//           features: Array.isArray(p.features)
-//             ? p.features.join(", ")
-//             : p.features,
-//         })),
-//       });
-//     } else {
-//       setEditId(null);
-//       setFormData({ bannerText: "", plans: initialPlanState });
-//     }
-//     setShowModal(true);
-//   };
-
-//   return (
-//     <div className="container-fluid p-4">
-//       <div className="d-flex justify-content-between align-items-center mb-4">
-//         <div>
-//           <h4 className="fw-bold mb-1">Pricing Management</h4>
-//           <p className="text-muted small">
-//             Manage day, week, month, and year subscription plans
-//           </p>
-//         </div>
-//         <CustomButton variant="gold" onClick={() => openModal()}>
-//           <i className="bi bi-plus-lg me-2"></i> Add Pricing
-//         </CustomButton>
-//       </div>
-
-//       <div className="card border-0 shadow-sm rounded-3">
-//         <div className="table-responsive">
-//           <table className="table table-hover align-middle mb-0">
-//             <thead className="table-light">
-//               <tr>
-//                 <th className="p-3">Banner Text</th>
-//                 <th className="text-center p-3">Basic</th>
-//                 <th className="text-center p-3">Marketplace</th>
-//                 <th className="text-center p-3">Enterprise</th>
-//                 <th className="text-end p-3">Actions</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {loading && data.length === 0 ? (
-//                 <tr>
-//                   <td colSpan="5" className="text-center py-5">
-//                     <div className="spinner-border text-warning"></div>
-//                   </td>
-//                 </tr>
-//               ) : (
-//                 pagination.paginatedData.map((item) => (
-//                   <tr key={item._id}>
-//                     <td
-//                       className="p-3 fw-semibold text-truncate"
-//                       style={{ maxWidth: "200px" }}>
-//                       {item.bannerText}
-//                     </td>
-//                     {[0, 1, 2].map((idx) => (
-//                       <td key={idx} className="text-center">
-//                         <div className="d-flex flex-column align-items-center">
-//                           <span className="fw-bold text-dark">
-//                             ${item.Plan?.[idx]?.price || "0"}
-//                           </span>
-//                           <span
-//                             className="badge bg-info-subtle text-info border border-info-subtle mt-1"
-//                             style={{ fontSize: "10px" }}>
-//                             {formatDuration(
-//                               item.Plan?.[idx]?.durationCount,
-//                               item.Plan?.[idx]?.duration,
-//                             )}
-//                           </span>
-//                         </div>
-//                       </td>
-//                     ))}
-//                     <td className="text-end p-3">
-//                       <button
-//                         className="btn btn-sm btn-outline-info me-2"
-//                         onClick={() => openModal(item)}>
-//                         <i className="bi bi-pencil-square"></i>
-//                       </button>
-//                       <button
-//                         className="btn btn-sm btn-outline-danger"
-//                         onClick={() => deleteItem(item._id)}>
-//                         <i className="bi bi-trash3"></i>
-//                       </button>
-//                     </td>
-//                   </tr>
-//                 ))
-//               )}
-//             </tbody>
-//           </table>
-//         </div>
-//       </div>
-
-//       <div className="mt-4">
-//         <Pagination {...pagination} />
-//       </div>
-
-//       {showModal && (
-//         <>
-//           <div
-//             className="modal fade show d-block"
-//             tabIndex="-1"
-//             style={{ zIndex: 9999, backgroundColor: "rgba(0,0,0,0.5)" }}
-//           >
-//             <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-//               <form
-//                 onSubmit={handleSave}
-//                 className="modal-content border-0 shadow-lg rounded-4"
-//                 style={{ maxHeight: "90vh" }}
-//               >
-//                 <div className="modal-header border-0 p-4 pb-0">
-//                   <h5 className="modal-title fw-bold">
-//                     {editId ? "Update Pricing Plan" : "Create New Pricing"}
-//                   </h5>
-//                   <button
-//                     type="button"
-//                     className="btn-close shadow-none"
-//                     onClick={() => setShowModal(false)}></button>
-//                 </div>
-
-//                 <div className="modal-body p-4">
-//                   <div className="mb-4">
-//                     <label className="form-label fw-bold small text-muted text-uppercase">
-//                       Banner Heading
-//                     </label>
-//                     <input
-//                       type="text"
-//                       className="form-control form-control-lg bg-light"
-//                       placeholder="e.g. Choose Your Plan"
-//                       value={formData.bannerText}
-//                       onChange={(e) =>
-//                         setFormData({
-//                           ...formData,
-//                           bannerText: e.target.value,
-//                         })
-//                       }
-//                       required
-//                     />
-//                   </div>
-
-//                   <div className="row g-3">
-//                     {formData.plans.map((plan, idx) => (
-//                       <div className="col-12 col-lg-4" key={idx}>
-//                         <div className="card h-100 border-0 bg-light p-3 rounded-3 shadow-sm">
-//                           <h6
-//                             className="fw-bold mb-3 border-bottom pb-2 text-primary text-uppercase"
-//                             style={{
-//                               fontSize: "13px",
-//                               letterSpacing: "1px",
-//                             }}>
-//                             {plan.name} Plan
-//                           </h6>
-
-//                           <div className="row g-2 mb-3">
-//                             <div className="col-6">
-//                               <label className="form-label small fw-bold text-muted">
-//                                 PRICE ($)
-//                               </label>
-//                               <input
-//                                 type="number"
-//                                 className="form-control border-0 shadow-sm"
-//                                 value={plan.price}
-//                                 onChange={(e) =>
-//                                   handlePlanChange(idx, "price", e.target.value)
-//                                 }
-//                                 required
-//                               />
-//                             </div>
-//                             <div className="col-6">
-//                               <label className="form-label small fw-bold text-muted">
-//                                 DURATION COUNT
-//                               </label>
-//                               <input
-//                                 type="number"
-//                                 min="1"
-//                                 className="form-control border-0 shadow-sm"
-//                                 value={plan.durationCount}
-//                                 onChange={(e) =>
-//                                   handlePlanChange(
-//                                     idx,
-//                                     "durationCount",
-//                                     e.target.value,
-//                                   )
-//                                 }
-//                                 required
-//                               />
-//                             </div>
-//                           </div>
-
-//                           <div className="mb-3">
-//                             <label className="form-label small fw-bold text-muted">
-//                               TIME UNIT (DAY/WEEK/MONTH/YEAR)
-//                             </label>
-//                             <select
-//                               className="form-select border-0 shadow-sm"
-//                               value={plan.duration}
-//                               onChange={(e) =>
-//                                 handlePlanChange(
-//                                   idx,
-//                                   "duration",
-//                                   e.target.value,
-//                                 )
-//                               }
-//                               required>
-//                               {DURATION_OPTIONS.map((opt) => (
-//                                 <option key={opt.value} value={opt.value}>
-//                                   {opt.label}
-//                                 </option>
-//                               ))}
-//                             </select>
-//                           </div>
-
-//                           <div>
-//                             <label className="form-label small fw-bold text-muted">
-//                               FEATURES (COMMA SEPARATED)
-//                             </label>
-//                             <textarea
-//                               className="form-control border-0 shadow-sm"
-//                               rows="3"
-//                               placeholder="Feature 1, Feature 2..."
-//                               value={plan.features}
-//                               onChange={(e) =>
-//                                 handlePlanChange(
-//                                   idx,
-//                                   "features",
-//                                   e.target.value,
-//                                 )
-//                               }
-//                               required
-//                             />
-//                           </div>
-//                         </div>
-//                       </div>
-//                     ))}
-//                   </div>
-//                 </div>
-
-//                 <div className="modal-footer border-0 p-4 pt-0 bg-white sticky-bottom">
-//                   <CustomButton
-//                     variant="cancel"
-//                     type="button" // Cancel बटन को सबमिट होने से बचाने के लिए
-//                     onClick={() => setShowModal(false)}>
-//                     Cancel
-//                   </CustomButton>
-//                   <CustomButton type="submit" loading={loading}>
-//                     {editId ? "Update Pricing Changes" : "Save Pricing Changes"}
-//                   </CustomButton>
-//                 </div>
-//               </form>
-//             </div>
-//           </div>
-//           <div
-//             className="modal-backdrop fade show"
-//             style={{ zIndex: 9998 }}></div>
-//         </>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Pricing;
-
-// import React, { useEffect, useState } from "react";
-// import { useCrud } from "../hook/useCrud";
-// import { usePagination } from "../hook/usePagination";
-// import Pagination from "../components/common/Pagination";
-// import CustomButton from "../components/common/CustomButton";
-// import {
-//   getAllPricingApi,
-//   addPricingApi,
-//   updatePricingApi,
-//   deletePricingApi,
-// } from "../services/authService";
-
-// const PRICING_METHODS = {
-//   getAll: getAllPricingApi,
-//   add: addPricingApi,
-//   update: updatePricingApi,
-//   delete: deletePricingApi,
-// };
-
-// const DURATION_OPTIONS = [
-//   { value: "day", label: "Day(s)" },
-//   { value: "week", label: "Week(s)" },
-//   { value: "month", label: "Month(s)" },
-//   { value: "year", label: "Year(s)" },
-// ];
-
-// const Pricing = () => {
-//   const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
-//     useCrud(PRICING_METHODS);
-//   const pagination = usePagination(data, 5);
-
-//   const [showModal, setShowModal] = useState(false);
-//   const [editId, setEditId] = useState(null);
-
-//   const initialPlanState = [
-//     {
-//       name: "Basic",
-//       price: "",
-//       features: "",
-//       duration: "month",
-//       durationCount: 1,
-//       listings: 0, // ⭐ New Param
-//       chatIsActive: false, // ⭐ New Param
-//     },
-//     {
-//       name: "Marketplace",
-//       price: "",
-//       features: "",
-//       duration: "month",
-//       durationCount: 1,
-//       listings: 0, // ⭐ New Param
-//       chatIsActive: false, // ⭐ New Param
-//     },
-//     {
-//       name: "Enterprise",
-//       price: "",
-//       features: "",
-//       duration: "month",
-//       durationCount: 1,
-//       listings: 0, // ⭐ New Param
-//       chatIsActive: false, // ⭐ New Param
-//     },
-//   ];
-
-//   const [formData, setFormData] = useState({
-//     bannerText: "",
-//     plans: initialPlanState,
-//   });
-
-//   useEffect(() => {
-//     fetchAll();
-//   }, [fetchAll]);
-
-//   const formatDuration = (count, type) => {
-//     if (!count || !type) return "N/A";
-//     const unit = parseInt(count) !== 1 ? `${type}s` : type;
-//     return `${count} ${unit.charAt(0).toUpperCase() + unit.slice(1)}`;
-//   };
-
-//   const handlePlanChange = (index, field, value) => {
-//     setFormData((prev) => {
-//       const updatedPlans = [...prev.plans];
-//       updatedPlans[index] = { ...updatedPlans[index], [field]: value };
-//       return { ...prev, plans: updatedPlans };
-//     });
-//   };
-
-//   const handleSave = async (e) => {
-//     e.preventDefault();
-
-//     // Formatting Payload according to your Backend Requirements
-//     const payload = {
-//       bannerText: formData.bannerText,
-//       Plan: formData.plans.map((p) => ({
-//         name: p.name,
-//         price: Number(p.price),
-//         duration: p.duration,
-//         durationCount: Number(p.durationCount),
-//         listings: Number(p.listings), // ⭐ Added
-//         chatIsActive: p.chatIsActive, // ⭐ Added
-//         features:
-//           typeof p.features === "string"
-//             ? p.features
-//                 .split(",")
-//                 .map((f) => f.trim())
-//                 .filter((f) => f !== "")
-//             : p.features,
-//       })),
-//     };
-
-//     // ⭐ PRINT PARAMETERS TO CONSOLE
-//     console.log(
-//       editId ? "Updating Pricing ID:" + editId : "Creating New Pricing",
-//     );
-//     console.log("Payload Parameters:", JSON.stringify(payload, null, 2));
-
-//     const success = editId
-//       ? await updateItem(editId, payload)
-//       : await addItem(payload);
-//     if (success) setShowModal(false);
-//   };
-
-//   const openModal = (item = null) => {
-//     if (item) {
-//       setEditId(item._id);
-//       setFormData({
-//         bannerText: item.bannerText || "",
-//         plans: (item.Plan || []).map((p) => ({
-//           name: p.name,
-//           price: p.price,
-//           duration: p.duration || "month",
-//           durationCount: p.durationCount || 1,
-//           listings: p.listings || 0, // ⭐ Load from DB
-//           chatIsActive: p.chatIsActive || false, // ⭐ Load from DB
-//           features: Array.isArray(p.features)
-//             ? p.features.join(", ")
-//             : p.features,
-//         })),
-//       });
-//     } else {
-//       setEditId(null);
-//       setFormData({ bannerText: "", plans: initialPlanState });
-//     }
-//     setShowModal(true);
-//   };
-
-//   return (
-//     <div className="container-fluid p-4 text-start">
-//       <div className="d-flex justify-content-between align-items-center mb-4">
-//         <div>
-//           <h4 className="fw-bold mb-1 text-navy">Pricing Management</h4>
-//           <p className="text-muted small">
-//             Update your banner and plan parameters.
-//           </p>
-//         </div>
-//         <CustomButton variant="gold" onClick={() => openModal()}>
-//           <i className="bi bi-plus-lg me-2"></i> Add Pricing
-//         </CustomButton>
-//       </div>
-
-//       <div className="card border-0 shadow-sm rounded-3">
-//         <div className="table-responsive">
-//           <table className="table table-hover align-middle mb-0 text-nowrap">
-//             <thead className="table-light">
-//               <tr>
-//                 <th className="p-3">Banner Text</th>
-//                 <th className="text-center p-3">Basic</th>
-//                 <th className="text-center p-3">Marketplace</th>
-//                 <th className="text-center p-3">Enterprise</th>
-//                 <th className="text-end p-3">Actions</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {loading && data.length === 0 ? (
-//                 <tr>
-//                   <td colSpan="5" className="text-center py-5">
-//                     <div className="spinner-border text-warning"></div>
-//                   </td>
-//                 </tr>
-//               ) : (
-//                 pagination.paginatedData.map((item) => (
-//                   <tr key={item._id}>
-//                     <td
-//                       className="p-3 fw-semibold text-truncate"
-//                       style={{ maxWidth: "200px" }}>
-//                       {item.bannerText}
-//                     </td>
-//                     {[0, 1, 2].map((idx) => (
-//                       <td key={idx} className="text-center">
-//                         <div className="d-flex flex-column align-items-center">
-//                           <span className="fw-bold text-dark">
-//                             ${item.Plan?.[idx]?.price || "0"}
-//                           </span>
-//                           <span
-//                             className="badge bg-light text-muted border mt-1"
-//                             style={{ fontSize: "9px" }}>
-//                             {formatDuration(
-//                               item.Plan?.[idx]?.durationCount,
-//                               item.Plan?.[idx]?.duration,
-//                             )}
-//                           </span>
-//                         </div>
-//                       </td>
-//                     ))}
-//                     <td className="text-end p-3">
-//                       <button
-//                         className="btn btn-sm btn-outline-info me-2"
-//                         onClick={() => openModal(item)}>
-//                         <i className="bi bi-pencil-square"></i>
-//                       </button>
-//                       <button
-//                         className="btn btn-sm btn-outline-danger"
-//                         onClick={() => deleteItem(item._id)}>
-//                         <i className="bi bi-trash3"></i>
-//                       </button>
-//                     </td>
-//                   </tr>
-//                 ))
-//               )}
-//             </tbody>
-//           </table>
-//         </div>
-//       </div>
-
-//       <div className="mt-4">
-//         <Pagination {...pagination} />
-//       </div>
-
-//       {showModal && (
-//         <>
-//           <div
-//             className="modal fade show d-block"
-//             tabIndex="-1"
-//             style={{ zIndex: 9999, backgroundColor: "rgba(0,0,0,0.5)" }}>
-//             <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-//               <form
-//                 onSubmit={handleSave}
-//                 className="modal-content border-0 shadow-lg rounded-4">
-//                 <div className="modal-header border-0 p-4 pb-0">
-//                   <h5 className="modal-title fw-bold">
-//                     {editId ? "Update Plan Parameters" : "Create New Pricing"}
-//                   </h5>
-//                   <button
-//                     type="button"
-//                     className="btn-close shadow-none"
-//                     onClick={() => setShowModal(false)}></button>
-//                 </div>
-
-//                 <div className="modal-body p-4">
-//                   <div className="mb-4">
-//                     <label className="form-label fw-bold small text-muted text-uppercase">
-//                       Banner Heading
-//                     </label>
-//                     <input
-//                       type="text"
-//                       className="form-control form-control-lg bg-light"
-//                       value={formData.bannerText}
-//                       onChange={(e) =>
-//                         setFormData({ ...formData, bannerText: e.target.value })
-//                       }
-//                       required
-//                     />
-//                   </div>
-
-//                   <div className="row g-3">
-//                     {formData.plans.map((plan, idx) => (
-//                       <div className="col-12 col-lg-4" key={idx}>
-//                         <div className="card h-100 border-0 bg-light p-3 rounded-3 shadow-sm border-top border-4 border-warning">
-//                           <h6 className="fw-bold mb-3 text-navy text-uppercase">
-//                             {plan.name}
-//                           </h6>
-
-//                           <div className="row g-2 mb-3">
-//                             <div className="col-6">
-//                               <label className="form-label small fw-bold">
-//                                 Price ($)
-//                               </label>
-//                               <input
-//                                 type="number"
-//                                 className="form-control"
-//                                 value={plan.price}
-//                                 onChange={(e) =>
-//                                   handlePlanChange(idx, "price", e.target.value)
-//                                 }
-//                                 required
-//                               />
-//                             </div>
-//                             <div className="col-6">
-//                               <label className="form-label small fw-bold">
-//                                 Listings Qty
-//                               </label>
-//                               <input
-//                                 type="number"
-//                                 className="form-control"
-//                                 value={plan.listings}
-//                                 onChange={(e) =>
-//                                   handlePlanChange(
-//                                     idx,
-//                                     "listings",
-//                                     e.target.value,
-//                                   )
-//                                 }
-//                                 required
-//                               />
-//                             </div>
-//                           </div>
-
-//                           <div className="row g-2 mb-3">
-//                             <div className="col-6">
-//                               <label className="form-label small fw-bold">
-//                                 Duration Count
-//                               </label>
-//                               <input
-//                                 type="number"
-//                                 min="1"
-//                                 className="form-control"
-//                                 value={plan.durationCount}
-//                                 onChange={(e) =>
-//                                   handlePlanChange(
-//                                     idx,
-//                                     "durationCount",
-//                                     e.target.value,
-//                                   )
-//                                 }
-//                                 required
-//                               />
-//                             </div>
-//                             <div className="col-6">
-//                               <label className="form-label small fw-bold">
-//                                 Unit
-//                               </label>
-//                               <select
-//                                 className="form-select"
-//                                 value={plan.duration}
-//                                 onChange={(e) =>
-//                                   handlePlanChange(
-//                                     idx,
-//                                     "duration",
-//                                     e.target.value,
-//                                   )
-//                                 }
-//                                 required>
-//                                 {DURATION_OPTIONS.map((opt) => (
-//                                   <option key={opt.value} value={opt.value}>
-//                                     {opt.label}
-//                                   </option>
-//                                 ))}
-//                               </select>
-//                             </div>
-//                           </div>
-
-//                           <div className="form-check form-switch mb-3">
-//                             <input
-//                               className="form-check-input"
-//                               type="checkbox"
-//                               checked={plan.chatIsActive}
-//                               onChange={(e) =>
-//                                 handlePlanChange(
-//                                   idx,
-//                                   "chatIsActive",
-//                                   e.target.checked,
-//                                 )
-//                               }
-//                             />
-//                             <label className="form-check-label small fw-bold">
-//                               Enable Chat System
-//                             </label>
-//                           </div>
-
-//                           <div>
-//                             <label className="form-label small fw-bold">
-//                               Features (Comma Sep.)
-//                             </label>
-//                             <textarea
-//                               className="form-control"
-//                               rows="3"
-//                               value={plan.features}
-//                               onChange={(e) =>
-//                                 handlePlanChange(
-//                                   idx,
-//                                   "features",
-//                                   e.target.value,
-//                                 )
-//                               }
-//                               required
-//                             />
-//                           </div>
-//                         </div>
-//                       </div>
-//                     ))}
-//                   </div>
-//                 </div>
-
-//                 <div className="modal-footer border-0 p-4 pt-0">
-//                   <CustomButton
-//                     variant="cancel"
-//                     type="button"
-//                     onClick={() => setShowModal(false)}>
-//                     Cancel
-//                   </CustomButton>
-//                   <CustomButton type="submit" loading={loading}>
-//                     {editId ? "Update Changes" : "Save Changes"}
-//                   </CustomButton>
-//                 </div>
-//               </form>
-//             </div>
-//           </div>
-//           <div
-//             className="modal-backdrop fade show"
-//             style={{ zIndex: 9998 }}></div>
-//         </>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Pricing;
 import React, { useEffect, useState } from "react";
 import { useCrud } from "../hook/useCrud";
 import { usePagination } from "../hook/usePagination";
 import Pagination from "../components/common/Pagination";
 import CustomButton from "../components/common/CustomButton";
+import { toast } from "react-toastify";
 import {
   getAllPricingApi,
   addPricingApi,
@@ -1118,13 +18,6 @@ const PRICING_METHODS = {
   delete: deletePricingApi,
 };
 
-const DURATION_OPTIONS = [
-  { value: "day", label: "Day(s)" },
-  { value: "week", label: "Week(s)" },
-  { value: "month", label: "Month(s)" },
-  { value: "year", label: "Year(s)" },
-];
-
 const Pricing = () => {
   const { data, loading, fetchAll, addItem, updateItem, deleteItem } =
     useCrud(PRICING_METHODS);
@@ -1133,9 +26,10 @@ const Pricing = () => {
   const [showModal, setShowModal] = useState(false);
   const [editId, setEditId] = useState(null);
 
+  // Strictly Month-based initial state
   const initialPlanState = [
     {
-      name: "Basic",
+      name: "Basic Plan",
       price: "",
       features: "",
       duration: "month",
@@ -1144,20 +38,20 @@ const Pricing = () => {
       chatIsActive: false,
     },
     {
-      name: "Marketplace",
+      name: "Standard Plan",
       price: "",
       features: "",
       duration: "month",
-      durationCount: 1,
+      durationCount: 3,
       listings: 0,
       chatIsActive: false,
     },
     {
-      name: "Enterprise",
+      name: "Premium Plan",
       price: "",
       features: "",
       duration: "month",
-      durationCount: 1,
+      durationCount: 12,
       listings: 0,
       chatIsActive: false,
     },
@@ -1172,12 +66,6 @@ const Pricing = () => {
     fetchAll();
   }, [fetchAll]);
 
-  const formatDuration = (count, type) => {
-    if (!count || !type) return "N/A";
-    const unit = parseInt(count) !== 1 ? `${type}s` : type;
-    return `${count} ${unit.charAt(0).toUpperCase() + unit.slice(1)}`;
-  };
-
   const handlePlanChange = (index, field, value) => {
     setFormData((prev) => {
       const updatedPlans = [...prev.plans];
@@ -1186,77 +74,50 @@ const Pricing = () => {
     });
   };
 
-const handleSave = async (e) => {
-  e.preventDefault();
-
-  try {
-    // Check if plans exists
-    if (!formData.plans || formData.plans.length === 0) {
-      return toast.error("No plans found to save!");
-    }
-
-    // ⭐ IMPORTANT: Backend expects "Plan" (Uppercase P) based on your console log
-    const payload = {
-      bannerText: String(formData.bannerText || ""),
-      Plan: formData.plans.map((p) => ({
-        name: String(p.name || ""),
-        price: Number(p.price) || 0,
-        duration: String(p.duration || "month"),
-        durationCount: Number(p.durationCount) || 1,
-        listings: Number(p.listings) || 0,
-        chatIsActive: Boolean(p.chatIsActive),
-        features:
-          typeof p.features === "string"
-            ? p.features
-                .split(",")
-                .map((f) => f.trim())
-                .filter((f) => f !== "")
-            : Array.isArray(p.features)
+  const handleSave = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        bannerText: String(formData.bannerText || ""),
+        Plan: formData.plans.map((p) => ({
+          ...p,
+          price: Number(p.price),
+          duration: "month", // Force duration to be 'month'
+          durationCount: Number(p.durationCount),
+          listings: Number(p.listings),
+          features:
+            typeof p.features === "string"
               ? p.features
-              : [],
-      })),
-    };
+                  .split(",")
+                  .map((f) => f.trim())
+                  .filter((f) => f !== "")
+              : p.features,
+        })),
+      };
 
-    console.log("📤 Sending Corrected Payload to Backend:", payload);
+      const success = editId
+        ? await updateItem(editId, payload)
+        : await addItem(payload);
 
-    let success;
-    if (editId) {
-      // updateItem calls PUT /pricing/update/:id
-      success = await updateItem(editId, payload);
-    } else {
-      // addItem calls POST /pricing/add
-      success = await addItem(payload);
+      if (success) {
+        setShowModal(false);
+        fetchAll();
+        toast.success("Pricing updated successfully!");
+      }
+    } catch (err) {
+      toast.error("Failed to save pricing configuration.");
     }
-
-    if (success) {
-      setShowModal(false);
-      // Data refresh karne ke liye fetchAll call karein (optional based on useCrud)
-      fetchAll();
-      toast.success("Pricing updated successfully!");
-    }
-  } catch (err) {
-    console.error("❌ Submission Failed:", err.response?.data || err.message);
-    toast.error(
-      err.response?.data?.message || "Failed to save. Check server logs.",
-    );
-  }
-};
+  };
 
   const openModal = (item = null) => {
     if (item) {
       setEditId(item._id);
-      // Support both lowercase 'plan' and uppercase 'Plan' from DB
       const existingPlans = item.plan || item.Plan || [];
-
       setFormData({
         bannerText: item.bannerText || "",
         plans: existingPlans.map((p) => ({
-          name: p.name,
-          price: p.price,
-          duration: p.duration || "month",
-          durationCount: p.durationCount || 1,
-          listings: p.listings || 0,
-          chatIsActive: p.chatIsActive || false,
+          ...p,
+          duration: "month", // Ensure consistency on load
           features: Array.isArray(p.features)
             ? p.features.join(", ")
             : p.features,
@@ -1273,33 +134,33 @@ const handleSave = async (e) => {
     <div className="container-fluid p-4 text-start">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h4 className="fw-bold mb-1 text-navy">Pricing Management</h4>
+          <h4 className="fw-bold mb-1 text-navy">Monthly Pricing Management</h4>
           <p className="text-muted small">
-            Configure banner text, plan limits, and chat availability.
+            Configure monthly subscription tiers and limits.
           </p>
         </div>
         <CustomButton variant="gold" onClick={() => openModal()}>
-          <i className="bi bi-plus-lg me-2"></i> Add Pricing
+          <i className="bi bi-plus-lg me-2"></i> Add New Config
         </CustomButton>
       </div>
 
       <div className="card border-0 shadow-sm rounded-3">
         <div className="table-responsive">
           <table className="table table-hover align-middle mb-0 text-nowrap">
-            <thead className="table-light">
+            <thead className="table-light text-muted small text-uppercase">
               <tr>
                 <th className="p-3">Banner Text</th>
-                <th className="text-center p-3">Basic</th>
-                <th className="text-center p-3">Marketplace</th>
-                <th className="text-center p-3">Enterprise</th>
+                <th className="text-center">Tier 1</th>
+                <th className="text-center">Tier 2</th>
+                <th className="text-center">Tier 3</th>
                 <th className="text-end p-3">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {loading && data.length === 0 ? (
+              {!loading && data.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="text-center py-5">
-                    <div className="spinner-border text-warning"></div>
+                  <td colSpan="5" className="text-center py-5 text-muted">
+                    No pricing configurations found.
                   </td>
                 </tr>
               ) : (
@@ -1311,30 +172,28 @@ const handleSave = async (e) => {
                       {item.bannerText}
                     </td>
                     {[0, 1, 2].map((idx) => {
-                      const p = item.plan?.[idx] || item.Plan?.[idx];
+                      const p = item.Plan?.[idx] || item.plan?.[idx];
                       return (
                         <td key={idx} className="text-center">
-                          <div className="d-flex flex-column align-items-center">
-                            <span className="fw-bold text-dark">
-                              ${p?.price || "0"}
-                            </span>
-                            <span
-                              className="badge bg-light text-muted border mt-1"
-                              style={{ fontSize: "9px" }}>
-                              {formatDuration(p?.durationCount, p?.duration)}
-                            </span>
+                          <div className="fw-bold text-dark">
+                            ${p?.price || 0}
+                          </div>
+                          <div
+                            className="text-muted"
+                            style={{ fontSize: "10px" }}>
+                            {p?.durationCount} Month(s)
                           </div>
                         </td>
                       );
                     })}
                     <td className="text-end p-3">
                       <button
-                        className="btn btn-sm btn-outline-info me-2"
+                        className="btn btn-sm btn-outline-info me-2 border-0"
                         onClick={() => openModal(item)}>
                         <i className="bi bi-pencil-square"></i>
                       </button>
                       <button
-                        className="btn btn-sm btn-outline-danger"
+                        className="btn btn-sm btn-outline-danger border-0"
                         onClick={() => deleteItem(item._id)}>
                         <i className="bi bi-trash3"></i>
                       </button>
@@ -1362,8 +221,8 @@ const handleSave = async (e) => {
                 onSubmit={handleSave}
                 className="modal-content border-0 shadow-lg rounded-4">
                 <div className="modal-header border-0 p-4 pb-0">
-                  <h5 className="modal-title fw-bold">
-                    {editId ? "Update Plan Parameters" : "Create New Pricing"}
+                  <h5 className="fw-bold">
+                    {editId ? "Update Plans" : "Create Plans"}
                   </h5>
                   <button
                     type="button"
@@ -1373,12 +232,12 @@ const handleSave = async (e) => {
 
                 <div className="modal-body p-4">
                   <div className="mb-4">
-                    <label className="form-label fw-bold small text-muted text-uppercase">
-                      Banner Heading
+                    <label className="form-label small fw-bold text-muted">
+                      BANNER HEADING
                     </label>
                     <input
                       type="text"
-                      className="form-control form-control-lg bg-light"
+                      className="form-control bg-light border-0"
                       value={formData.bannerText}
                       onChange={(e) =>
                         setFormData({ ...formData, bannerText: e.target.value })
@@ -1391,18 +250,24 @@ const handleSave = async (e) => {
                     {formData.plans.map((plan, idx) => (
                       <div className="col-12 col-lg-4" key={idx}>
                         <div className="card h-100 border-0 bg-light p-3 rounded-3 shadow-sm border-top border-4 border-warning">
-                          <h6 className="fw-bold mb-3 text-navy text-uppercase">
-                            {plan.name} Plan
-                          </h6>
+                          <input
+                            type="text"
+                            className="form-control fw-bold mb-3 border-0 bg-transparent text-navy p-0"
+                            value={plan.name}
+                            onChange={(e) =>
+                              handlePlanChange(idx, "name", e.target.value)
+                            }
+                            style={{ fontSize: "1.1rem" }}
+                          />
 
                           <div className="row g-2 mb-3">
                             <div className="col-6">
-                              <label className="form-label small fw-bold">
-                                Price ($)
+                              <label className="form-label extra-small fw-bold">
+                                PRICE ($)
                               </label>
                               <input
                                 type="number"
-                                className="form-control shadow-sm"
+                                className="form-control form-control-sm border-0 shadow-sm"
                                 value={plan.price}
                                 onChange={(e) =>
                                   handlePlanChange(idx, "price", e.target.value)
@@ -1411,12 +276,12 @@ const handleSave = async (e) => {
                               />
                             </div>
                             <div className="col-6">
-                              <label className="form-label small fw-bold">
-                                Listings Qty
+                              <label className="form-label extra-small fw-bold">
+                                LISTINGS LIMIT
                               </label>
                               <input
                                 type="number"
-                                className="form-control shadow-sm"
+                                className="form-control form-control-sm border-0 shadow-sm"
                                 value={plan.listings}
                                 onChange={(e) =>
                                   handlePlanChange(
@@ -1430,48 +295,24 @@ const handleSave = async (e) => {
                             </div>
                           </div>
 
-                          <div className="row g-2 mb-3">
-                            <div className="col-6">
-                              <label className="form-label small fw-bold">
-                                Duration Count
-                              </label>
-                              <input
-                                type="number"
-                                min="1"
-                                className="form-control shadow-sm"
-                                value={plan.durationCount}
-                                onChange={(e) =>
-                                  handlePlanChange(
-                                    idx,
-                                    "durationCount",
-                                    e.target.value,
-                                  )
-                                }
-                                required
-                              />
-                            </div>
-                            <div className="col-6">
-                              <label className="form-label small fw-bold">
-                                Unit
-                              </label>
-                              <select
-                                className="form-select shadow-sm"
-                                value={plan.duration}
-                                onChange={(e) =>
-                                  handlePlanChange(
-                                    idx,
-                                    "duration",
-                                    e.target.value,
-                                  )
-                                }
-                                required>
-                                {DURATION_OPTIONS.map((opt) => (
-                                  <option key={opt.value} value={opt.value}>
-                                    {opt.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
+                          <div className="mb-3">
+                            <label className="form-label extra-small fw-bold">
+                              DURATION (IN MONTHS)
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              className="form-control form-control-sm border-0 shadow-sm"
+                              value={plan.durationCount}
+                              onChange={(e) =>
+                                handlePlanChange(
+                                  idx,
+                                  "durationCount",
+                                  e.target.value,
+                                )
+                              }
+                              required
+                            />
                           </div>
 
                           <div className="form-check form-switch mb-3 p-2 bg-white rounded border ps-5">
@@ -1487,19 +328,18 @@ const handleSave = async (e) => {
                                 )
                               }
                             />
-                            <label className="form-check-label small fw-bold text-navy">
-                              Enable Chat System
+                            <label className="form-check-label small fw-bold">
+                              Enable Direct Chat
                             </label>
                           </div>
 
                           <div>
-                            <label className="form-label small fw-bold text-muted">
+                            <label className="form-label extra-small fw-bold text-muted">
                               FEATURES (COMMA SEPARATED)
                             </label>
                             <textarea
                               className="form-control border-0 shadow-sm"
                               rows="3"
-                              placeholder="Feature 1, Feature 2..."
                               value={plan.features}
                               onChange={(e) =>
                                 handlePlanChange(
@@ -1525,7 +365,7 @@ const handleSave = async (e) => {
                     Cancel
                   </CustomButton>
                   <CustomButton type="submit" loading={loading}>
-                    {editId ? "Update Changes" : "Save Changes"}
+                    {editId ? "Update All Tiers" : "Save All Tiers"}
                   </CustomButton>
                 </div>
               </form>
